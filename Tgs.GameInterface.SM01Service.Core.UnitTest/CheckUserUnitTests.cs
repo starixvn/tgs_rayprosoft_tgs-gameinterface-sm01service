@@ -8,7 +8,7 @@ namespace Tgs.GameInterface.SM01Service.Core.UnitTest;
 public class CheckUserUnitTests
 {
     [TestMethod]
-    public async Task 用戶存在則回傳用戶訊息()
+    public async Task Player_Exists_Will_Return_Player_Info()
     {
         var apiUrl = new Uri("https://cn.ucfclive.com");
         var merchnatId = "SQjCxm2cX5bahBta";
