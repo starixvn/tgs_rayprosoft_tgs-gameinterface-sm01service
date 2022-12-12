@@ -26,7 +26,7 @@ internal class GameApiClient : IGameApiClient
         {
             ["merchantId"] = merchantId,
             ["customerName"] = customerName,
-            ["timestamp"] = DateTime.UtcNow.MillisecondsTimestamp().ToString(),
+            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
         };
 
         var sign = SM01Hasher.ComputeHash(merchantKey, parameters);
@@ -78,7 +78,7 @@ internal class GameApiClient : IGameApiClient
         var parameters = new Dictionary<string, string>
         {
             ["merchantId"] = merchantId,
-            ["timestamp"] = DateTime.UtcNow.MillisecondsTimestamp().ToString(),
+            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
             ["StartDate"] = startDate.ToString("yyyy-MM-dd HH:mm:ss"),
             ["EndDate"] = endDate.ToString("yyyy-MM-dd HH:mm:ss"),
         };
@@ -142,7 +142,7 @@ internal class GameApiClient : IGameApiClient
         var parameters = new Dictionary<string, string>
         {
             ["merchantId"] = merchantId,
-            ["timestamp"] = DateTime.UtcNow.MillisecondsTimestamp().ToString(),
+            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
             ["StartDate"] = startDate.ToString("yyyy-MM-dd HH:mm:ss"),
             ["EndDate"] = endDate.ToString("yyyy-MM-dd HH:mm:ss"),
             ["customerName"] = customerName,
@@ -213,7 +213,7 @@ internal class GameApiClient : IGameApiClient
         {
             ["merchantId"] = merchantId,
             ["customerName"] = customerName,
-            ["timestamp"] = DateTime.UtcNow.MillisecondsTimestamp().ToString(),
+            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
         };
 
         var sign = SM01Hasher.ComputeHash(merchantKey, parameters);
@@ -259,55 +259,21 @@ internal class GameApiClient : IGameApiClient
         return new GetUserBalanceResult(process, balance);
     }
 
-    public async ValueTask<string> PlatformLoginAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, CancellationToken cancellationToken = default)
+    public ValueTask<PlatformLoginResult> PlatformLoginAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, CancellationToken cancellationToken = default)
     {
         var parameters = new Dictionary<string, string>
         {
             ["merchantId"] = merchantId,
             ["customerName"] = customerName,
-            ["timestamp"] = DateTime.UtcNow.MillisecondsTimestamp().ToString(),
+            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
         };
 
         var sign = SM01Hasher.ComputeHash(merchantKey, parameters);
         parameters.Add("sign", sign);
 
-        var url = new Uri(apiUrl, "/auth/platformLogin");
+        _logger.LogInformation("SM01 PlatformLoginAsync, parameters:{parameters}", JsonSerializer.Serialize(parameters));
 
-        var sw = Stopwatch.StartNew();
-
-        HttpContent content = new FormUrlEncodedContent(parameters);
-
-        var httpResponseMessage = await _client.PostAsync(url, content, cancellationToken);
-
-        sw.Stop();
-
-        var responseMessage = default(string);
-
-        using (var sr = new StreamReader(httpResponseMessage.Content.ReadAsStreamAsync(cancellationToken).Result))
-        {
-            responseMessage = await sr.ReadToEndAsync().ConfigureAwait(false) ?? string.Empty;
-        }
-
-        var apiLogEvent = new GameApiLogEvent
-        {
-            Path = httpResponseMessage.RequestMessage?.RequestUri?.AbsoluteUri.NoLongerThan(512) ?? string.Empty,
-            Method = httpResponseMessage.RequestMessage?.Method.ToString().NoLongerThan(8) ?? string.Empty,
-            Prefix = "PlatformLogin",
-            ServerName = Environment.MachineName.NoLongerThan(128),
-            RequestHeaders = httpResponseMessage.RequestMessage?.Headers + httpResponseMessage.RequestMessage?.Content?.Headers?.ToString(),
-            RequestContent = (await content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false)).NoLongerThan(4096),
-            ResponseHeaders = httpResponseMessage.Headers.ToString(),
-            ResponseContent = responseMessage.NoLongerThan(4096),
-            ResponseCode = (short)httpResponseMessage.StatusCode,
-            ExecutionTimeMs = (int)sw.ElapsedMilliseconds,
-            RecordedOn = DateTimeOffset.UtcNow
-        };
-
-        _logger.LogInformation("{apiLogEvent}", JsonSerializer.Serialize(apiLogEvent));
-
-        _ = httpResponseMessage.EnsureSuccessStatusCode();
-
-        return responseMessage;
+        return ValueTask.FromResult(new PlatformLoginResult(merchantId, customerName, long.Parse(parameters["timestamp"]), parameters["sign"]));
     }
 
     public async ValueTask<TransferInResult> TransferInAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, int amount, string merchantTransactionId, CancellationToken cancellationToken = default)
@@ -317,7 +283,7 @@ internal class GameApiClient : IGameApiClient
             ["merchantId"] = merchantId,
             ["customerName"] = customerName,
             ["amount"] = amount.ToString(),
-            ["timestamp"] = DateTime.UtcNow.MillisecondsTimestamp().ToString(),
+            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
             ["merchantTransactionId"] = merchantTransactionId.Replace("-", ""),
         };
 
@@ -372,7 +338,7 @@ internal class GameApiClient : IGameApiClient
             ["merchantId"] = merchantId,
             ["customerName"] = customerName,
             ["amount"] = amount.ToString(),
-            ["timestamp"] = DateTime.UtcNow.MillisecondsTimestamp().ToString(),
+            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
             ["merchantTransactionId"] = merchantTransactionId.Replace("-", ""),//因廠商限制長度32
         };
 

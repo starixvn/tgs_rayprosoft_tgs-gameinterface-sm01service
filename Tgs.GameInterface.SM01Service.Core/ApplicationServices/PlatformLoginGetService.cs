@@ -2,7 +2,7 @@
 
 namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices;
 
-internal class PlatformLoginGetService : IGetService<PlatformLoginQuery, string>
+internal class PlatformLoginGetService : IGetService<PlatformLoginQuery, PlatformLoginResult>
 {
     private readonly IGameApiClient _client;
 
@@ -11,11 +11,14 @@ internal class PlatformLoginGetService : IGetService<PlatformLoginQuery, string>
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public ValueTask<string> GetAsync(PlatformLoginQuery query, CancellationToken cancellationToken = default)
-        => _client.PlatformLoginAsync(
-            query.ApiUrl,
-            query.MerchantId,
-            query.MerchantKey,
-            query.CustomerName,
-            cancellationToken);
+    public async ValueTask<PlatformLoginResult> GetAsync(PlatformLoginQuery query, CancellationToken cancellationToken = default)
+    {
+        var result = await _client.PlatformLoginAsync(
+                query.ApiUrl,
+                query.MerchantId,
+                query.MerchantKey,
+                query.CustomerName,
+                cancellationToken);
+        return new PlatformLoginResult(result.MerchantId, result.CustomerName, result.Timestamp, result.Sign);
+    }
 }

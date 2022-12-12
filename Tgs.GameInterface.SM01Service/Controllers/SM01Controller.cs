@@ -133,8 +133,8 @@ public class SM01Controller : ControllerBase
     }
 
     [HttpPost("login")]
-    public async ValueTask<string> PlatformLoginAsync(
-        [FromServices] IGetService<PlatformLoginQuery, string> service,
+    public async ValueTask<PlatformLoginResultViewModel> PlatformLoginAsync(
+        [FromServices] IGetService<PlatformLoginQuery, PlatformLoginResult> service,
         PlatformLoginViewModel source)
     {
         var query = new PlatformLoginQuery(
@@ -142,7 +142,13 @@ public class SM01Controller : ControllerBase
             source.MerchantId,
             source.MerchantKey,
             source.CustomerName);
-        return await service.GetAsync(query);
+        var result = await service.GetAsync(query);
+
+        return new PlatformLoginResultViewModel(
+            result.MerchantId,
+            result.CustomerName,
+            result.Timestamp,
+            result.Sign);
     }
 
     [HttpPost("game/history/settled", Name = "GameHistorySettled")]

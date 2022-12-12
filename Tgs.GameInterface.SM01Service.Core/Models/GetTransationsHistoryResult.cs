@@ -5,29 +5,29 @@ namespace Tgs.GameInterface.SM01Service.Core.Models;
 public record GetTransationsHistoryResult
 {
     [JsonPropertyName("bet_id")]
-    public string BetId { get; set; } = default!;
+    public string BetId { get; init; } = default!;
 
     [JsonPropertyName("game_number")]
-    public string GameNumber { get; set; } = default!;
+    public string GameNumber { get; init; } = default!;
 
     [JsonPropertyName("bet_side")]
-    public string BetSide { get; set; } = default!;
+    public string BetSide { get; init; } = default!;
 
     [JsonPropertyName("win_or_lost")]
-    public string WinOrLost { get; set; } = default!;
+    public int WinOrLost { get; init; }
 
     [JsonPropertyName("create_at")]
-    public DateTime CreateAt { get; set; }
+    public DateTime CreateAt { get; init; }
 
     [JsonPropertyName("winner")]
-    public string Winner { get; set; } = default!;
+    public string Winner { get; init; } = default!;
 
     [JsonPropertyName("bet_amount")]
-    public decimal BetAmount { get; set; }
+    public decimal BetAmount { get; init; }
 
     [JsonPropertyName("odds")]
-    public string Odds { get; set; } = default!;
+    public string Odds { get; init; } = default!;
 
     [JsonPropertyName("customerName")]
-    public string PlayerCode { get; set; } = default!;
+    public string PlayerCode { get; init; } = default!;
 }

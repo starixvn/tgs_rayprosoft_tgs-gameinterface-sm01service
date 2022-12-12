@@ -95,7 +95,10 @@ message FundHistory{
 }
 
 message PlatformLoginReply {
-	string html = 1;
+	string merchant_id = 1;
+	string customer_name = 2;
+	int64 timestamp = 3;
+	string sign = 4;
 }
 
 message GameHistorySettledReply {

@@ -44,9 +44,9 @@ internal class GameHistorySettledQueryService : IQueryService<GameHistorySettled
                 ExternalClosedOn: externalClosedOn,
                 Bet: bettingHistoryBet.BetAmount,
                 ValidBet: bettingHistoryBet.BetAmount,
-                PlayerWinLoss: decimal.Parse(bettingHistoryBet.WinOrLost),
+                PlayerWinLoss: decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),
                 Turnover: bettingHistoryBet.BetAmount,
-                Settle: bettingHistoryBet.BetAmount + decimal.Parse(bettingHistoryBet.WinOrLost),
+                Settle: bettingHistoryBet.BetAmount + decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),
                 AdditionalData: JsonSerializer.Serialize(bettingHistoryBet));
         }
     }
