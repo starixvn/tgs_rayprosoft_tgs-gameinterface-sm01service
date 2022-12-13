@@ -34,14 +34,12 @@ internal class GameHistorySettledQueryService : IQueryService<GameHistorySettled
 
         foreach (var bettingHistoryBet in bettingHistoryBets)
         {
-            DateTimeOffset externalClosedOn = DateTime.UnixEpoch;
-
+            
             yield return new GameHistorySettledResult(
                 PlayerCode: bettingHistoryBet.PlayerCode,
-                ExternalRoundId: bettingHistoryBet.BetId,
-                IsClosed: true,
+                ExternalRoundId: bettingHistoryBet.BetId,                
                 ExternalCreatedOn: bettingHistoryBet.CreateAt,
-                ExternalClosedOn: externalClosedOn,
+                ExternalClosedOn: bettingHistoryBet.UpdateAt,
                 Bet: bettingHistoryBet.BetAmount,
                 ValidBet: bettingHistoryBet.BetAmount,
                 PlayerWinLoss: decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),

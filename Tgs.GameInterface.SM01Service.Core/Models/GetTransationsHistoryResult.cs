@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace Tgs.GameInterface.SM01Service.Core.Models;
 
@@ -17,7 +18,16 @@ public record GetTransationsHistoryResult
     public int WinOrLost { get; init; }
 
     [JsonPropertyName("create_at")]
-    public DateTime CreateAt { get; init; }
+    public string _createAt { get; init; } = default!;
+
+    [JsonIgnore]
+    public DateTime CreateAt => DateTime.ParseExact(_createAt, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+
+    [JsonPropertyName("update_at")]
+    public string _updateAt { get; init; } = default!;
+
+    [JsonIgnore]
+    public DateTime UpdateAt => DateTime.ParseExact(_updateAt, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
 
     [JsonPropertyName("winner")]
     public string Winner { get; init; } = default!;

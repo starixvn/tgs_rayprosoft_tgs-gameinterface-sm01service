@@ -9,6 +9,26 @@ namespace Tgs.GameInterface.SM01Service.Controllers;
 [Route("sm01")]
 public class SM01Controller : ControllerBase
 {
+    /// <summary>
+    /// Funds the in asynchronous.(GP -> Tgs)
+    /// </summary>
+    /// <param name="service"></param>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    /// <remarks>
+    /// <b>Example</b><br />
+    ///
+    ///     Post
+    ///
+    ///         {
+    ///             "apiUrl": "https://cn.ucfclive.com",
+    ///             "merchantId": "SQjCxm2cX5bahBta",
+    ///             "merchantKey": "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb",
+    ///             "customerName": "4ucmqplxb029",
+    ///             "refTransactionCode": "8a1ff03c-8101-0000-0001-00009da1fea9",
+    ///             "amount": 10
+    ///         }
+    /// </remarks>
     [HttpPost("fund/in", Name = "FundIn")]
     public async ValueTask<FundResultViewModel> FundInAsync(
         [FromServices] IGetService<FundInQuery, FundResult> service,
@@ -33,6 +53,26 @@ public class SM01Controller : ControllerBase
             Balance: result.Balance);
     }
 
+    /// <summary>
+    /// Funds the out asynchronous.(Tgs -> GP)
+    /// </summary>
+    /// <param name="service"></param>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    /// <remarks>
+    /// <b>Example</b><br />
+    ///
+    ///     Post
+    ///
+    ///         {
+    ///             "apiUrl": "https://cn.ucfclive.com",
+    ///             "merchantId": "SQjCxm2cX5bahBta",
+    ///             "merchantKey": "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb",
+    ///             "customerName": "4ucmqplxb029",
+    ///             "refTransactionCode": "8a1ff03c-8101-0000-0001-00009da1fea9",
+    ///             "amount": 10
+    ///         }
+    /// </remarks>
     [HttpPost("fund/out", Name = "FundOut")]
     public async ValueTask<FundResultViewModel> FundOutAsync(
         [FromServices] IGetService<FundOutQuery, FundResult> service,
@@ -57,6 +97,28 @@ public class SM01Controller : ControllerBase
             Balance: result.Balance);
     }
 
+    /// <summary>
+    /// 獲取Fund In或Fund Out歷史記錄
+    /// </summary>
+    /// <param name="service"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
+    /// <remarks>
+    /// <b>Example</b><br />
+    /// isFundOut:true (Tgs -> GP)<br />
+    /// isFundOut:false(GP ->Tgs)<br />
+    ///     Post
+    ///
+    ///         {
+    ///             "apiUrl": "https://cn.ucfclive.com",
+    ///             "merchantId": "SQjCxm2cX5bahBta",
+    ///             "merchantKey": "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb",
+    ///             "customerName": "4ucmqplxb029",
+    ///             "isFundOut": true,
+    ///             "startDate": "2022-12-01T03:15:43.434Z",
+    ///             "endDate": "2022-12-13T03:15:43.434Z"
+    ///         }
+    /// </remarks>
     [HttpPost("fund/history", Name = "FundHistory")]
     public async IAsyncEnumerable<FundHistoryResultViewModel> FundHistoryAsync(
         [FromServices] IQueryService<FundHistoryQuery, FundHistoryResult> service,
@@ -94,6 +156,25 @@ public class SM01Controller : ControllerBase
         }
     }
 
+    /// <summary>
+    /// 檢查玩家，玩家存在則返回玩家訊息，不存在則創建玩家
+    /// </summary>
+    /// <param name="service"></param>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    /// <remarks>
+    /// <b>Example</b><br />
+    ///
+    ///     Post
+    ///
+    ///         {
+    ///             "apiUrl": "https://cn.ucfclive.com",
+    ///             "merchantId": "SQjCxm2cX5bahBta",
+    ///             "merchantKey": "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb",
+    ///             "customerName": "4ucmqplxb029"
+    ///         }
+    /// </remarks>
+
     [HttpPost("player/create", Name = "PlayerCreate")]
     public ValueTask PlayerCreateAsync(
         [FromServices] ICommandService<PlayerCreateCommand> service,
@@ -110,6 +191,24 @@ public class SM01Controller : ControllerBase
                 cancellationToken: HttpContext.RequestAborted);
     }
 
+    /// <summary>
+    /// 取玩家餘額
+    /// </summary>
+    /// <param name="service"></param>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    /// <remarks>
+    /// <b>Example</b><br />
+    ///
+    ///     Post
+    ///
+    ///         {
+    ///             "apiUrl": "https://cn.ucfclive.com",
+    ///             "merchantId": "SQjCxm2cX5bahBta",
+    ///             "merchantKey": "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb",
+    ///             "customerName": "4ucmqplxb029"
+    ///         }
+    /// </remarks>
     [HttpPost("player/balance", Name = "PlayerBalance")]
     public async ValueTask<PlayerBalanceResultViewModel> PlayerBalanceAsync(
         [FromServices] IGetService<PlayerBalanceQuery, PlayerBalanceResult> service,
@@ -132,6 +231,25 @@ public class SM01Controller : ControllerBase
             result.Balance);
     }
 
+    /// <summary>
+    /// 取得玩家登入需要的資訊
+    /// </summary>
+    /// <param name="service"></param>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    /// <remarks>
+    /// <b>Example</b><br />
+    ///
+    ///     Post
+    ///
+    ///         {
+    ///             "apiUrl": "https://cn.ucfclive.com",
+    ///             "merchantId": "SQjCxm2cX5bahBta",
+    ///             "merchantKey": "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb",
+    ///             "customerName": "4ucmqplxb029"
+    ///         }
+    /// </remarks>
+
     [HttpPost("login")]
     public async ValueTask<PlatformLoginResultViewModel> PlatformLoginAsync(
         [FromServices] IGetService<PlatformLoginQuery, PlatformLoginResult> service,
@@ -151,6 +269,25 @@ public class SM01Controller : ControllerBase
             result.Sign);
     }
 
+    /// <summary>
+    /// 獲取遊戲結算記錄
+    /// </summary>
+    /// <param name="service"></param>
+    /// <param name="model"></param>
+    /// <returns></returns>
+    /// <remarks>
+    /// <b>Example</b><br />
+    ///
+    ///     Post
+    ///
+    ///         {
+    ///             "apiUrl": "https://cn.ucfclive.com",
+    ///             "merchantId": "SQjCxm2cX5bahBta",
+    ///             "merchantKey": "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb",
+    ///             "startDate": "2022-12-12T11:30:58.148Z",
+    ///             "endDate": "2022-12-12T12:00:58.148Z"
+    ///         }
+    /// </remarks>
     [HttpPost("game/history/settled", Name = "GameHistorySettled")]
     public async IAsyncEnumerable<GameHistorySettledResultViewModel> GameHistorySettledAsync(
         [FromServices] IQueryService<GameHistorySettledQuery, GameHistorySettledResult> service,
@@ -181,7 +318,6 @@ public class SM01Controller : ControllerBase
             yield return new GameHistorySettledResultViewModel(
                 PlayerCode: gameRecord.PlayerCode,
                 ExternalRoundId: gameRecord.ExternalRoundId,
-                IsClosed: gameRecord.IsClosed,
                 ExternalCreatedOn: gameRecord.ExternalCreatedOn,
                 ExternalClosedOn: gameRecord.ExternalClosedOn,
                 Bet: gameRecord.Bet,

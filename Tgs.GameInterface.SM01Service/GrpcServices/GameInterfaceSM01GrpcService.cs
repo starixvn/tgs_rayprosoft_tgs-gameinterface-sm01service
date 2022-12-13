@@ -181,7 +181,6 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
                     {
                         PlayerCode = gameHistorySettled.PlayerCode,
                         ExternalRoundId = gameHistorySettled.ExternalRoundId,
-                        IsClosed = gameHistorySettled.IsClosed,
                         ExternalCreatedOn = gameHistorySettled.ExternalCreatedOn.ToTimestamp(),
                         ExternalClosedOn = gameHistorySettled.ExternalClosedOn.ToTimestamp(),
                         Bet = gameHistorySettled.Bet,

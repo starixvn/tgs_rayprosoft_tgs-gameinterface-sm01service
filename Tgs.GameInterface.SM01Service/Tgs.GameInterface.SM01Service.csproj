@@ -8,13 +8,20 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+		<NoWarn>$(NoWarn);1591;0063</NoWarn>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+	</PropertyGroup>
+
   <ItemGroup>
     <None Remove="Protos\gameinterfacesm01service.proto" />
   </ItemGroup>
 
 	  <ItemGroup>
 		<ProjectReference Include="..\Tgs.GameInterface.SM01Service.Core\Tgs.GameInterface.SM01Service.Core.csproj" />
-	  </ItemGroup>
+	  </ItemGroup>	
 
 
 	<ItemGroup>

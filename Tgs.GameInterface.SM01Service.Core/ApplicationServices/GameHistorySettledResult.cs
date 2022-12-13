@@ -2,8 +2,7 @@
 
 public record GameHistorySettledResult(
     string PlayerCode,
-    string ExternalRoundId,
-    bool IsClosed,    
+    string ExternalRoundId,    
     DateTimeOffset ExternalCreatedOn,
     DateTimeOffset ExternalClosedOn,
     decimal Bet,
