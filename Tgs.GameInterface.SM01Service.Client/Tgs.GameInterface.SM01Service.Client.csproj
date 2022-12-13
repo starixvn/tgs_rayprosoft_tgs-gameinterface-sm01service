@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+	<TargetFramework>net6.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<Version>0.0.1</Version>
+	<Authors>Raypro</Authors>
+	<Description>Tgs GameInterface SM01 Client</Description>
+	<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-sm01service</PackageProjectUrl>
+	<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-gameinterface-sm01service.git</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="gameinterfacesm01service.proto" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.49.0" />
+		<PackageReference Include="Grpc.Net.ClientFactory" Version="2.49.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.50.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="PhoenixToolkits.Protobuf.ExtendTypes" Version="0.0.6" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Protobuf Include="gameinterfacesm01service.proto" GrpcServices="Client" />
+	</ItemGroup>
+
+</Project>

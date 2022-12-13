@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+import "phoenix/protobuf/decimal.proto";
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "Tgs.GameInterface.SM01Service.Protos";
+
+package GameInterfaceSM01Service;
+
+// The greeting service definition.
+service  GameInterfaceSM01Service{
+  // Sends a greeting
+  rpc PlayerCreate (PlayerCreateRequest) returns (BaseReply);
+  rpc PlayerBalance (PlayerBalanceRequest) returns (PlayerBalanceReply);
+  rpc FundIn (FundRequest) returns (FundReply);
+  rpc FundOut (FundRequest) returns (FundReply);
+  rpc FundHistory (FundHistoryRequest) returns (FundHistoryReply);
+  rpc PlatformLogin (PlatformLoginRequest) returns (PlatformLoginReply);
+  rpc GameHistorySettled (GameHistorySettledRequest) returns (GameHistorySettledReply);
+}
+
+message PlayerCreateRequest {
+	string api_url = 1;
+	string merchant_id = 2;
+	string merchant_key = 3;
+	string customer_name = 4;
+}
+
+message PlayerBalanceRequest {
+	string api_url = 1;
+	string merchant_id = 2;
+	string merchant_key = 3;
+	string customer_name = 4;
+}
+
+message FundRequest {
+	string api_url = 1;
+	string merchant_id = 2;
+	string merchant_key = 3;
+	string customer_name = 4;
+	string ref_transaction_code = 5;
+	int32 amount = 6;
+}
+
+message FundHistoryRequest{
+	string api_url = 1;
+	string merchant_id = 2;
+	string merchant_key = 3;
+	string customer_name = 4;
+	bool is_fund_out = 5;
+	google.protobuf.Timestamp start_date = 6;
+	google.protobuf.Timestamp end_date = 7;
+}
+
+message PlatformLoginRequest{
+	string api_url = 1;
+	string merchant_id = 2;
+	string merchant_key = 3;
+	string customer_name = 4;
+}
+
+message GameHistorySettledRequest {
+	string api_url = 1;
+	string merchant_id = 2;
+	string merchant_key = 3;
+	google.protobuf.Timestamp start_date = 4; 
+	google.protobuf.Timestamp end_date = 5;	
+}
+
+// The response message containing the greetings.
+message BaseReply{
+	bool status = 1;
+}
+
+message PlayerBalanceReply {
+	bool is_player_exist = 1;
+	int32 balance = 2;
+}
+
+message FundReply {
+	string ref_transaction_code = 1;
+    string transaction_id = 2;
+    int32 balance = 3;
+}
+
+message FundHistoryReply{
+	repeated FundHistory items = 1;
+}
+
+message FundHistory{
+	string transaction_id = 1;
+	int32 amount = 2;
+	google.protobuf.Timestamp created_time = 3;
+	string player_code = 4;
+}
+
+message PlatformLoginReply {
+	string merchant_id = 1;
+	string customer_name = 2;
+	int64 timestamp = 3;
+	string sign = 4;
+}
+
+message GameHistorySettledReply {
+	repeated GameHistorySettled items = 1;
+}
+
+message GameHistorySettled {
+    string player_code = 1;
+    string external_round_id = 2;    
+	google.protobuf.Timestamp external_created_on = 3;
+	google.protobuf.Timestamp external_closed_on = 4;
+	phoenix.protobuf.DecimalValue bet = 5;
+	phoenix.protobuf.DecimalValue valid_bet = 6;
+	phoenix.protobuf.DecimalValue player_win_loss = 7;
+	phoenix.protobuf.DecimalValue turnover = 8;
+	phoenix.protobuf.DecimalValue settle = 9;
+    string additional_data = 10;
+}
