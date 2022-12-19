@@ -27,15 +27,17 @@ public class GetUserBalanceUnitTests
 
         var sut = new GameApiClient(fakeHttpClient, fakeLog);
 
-        _ = await Assert
-        .ThrowsExceptionAsync<GameProviderResponseErrorException>(() =>
-            sut.GetUserBalanceAsync(
+        var actual = await sut
+            .GetUserBalanceAsync(
                 apiUrl: apiUrl,
                 merchantId: merchantId,
                 merchantKey: merchantKey,
                 customerName: customerName)
-            .AsTask())
-        .ConfigureAwait(false);
+            .ConfigureAwait(false);
+
+        Assert.IsNotNull(actual);
+        Assert.IsFalse(actual.IsPlayerExist);
+        Assert.AreEqual(0, actual.Balance);
     }
 
     [TestMethod]

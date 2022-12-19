@@ -258,7 +258,7 @@ internal class GameApiClient : IGameApiClient
         }
 
         var balance = jsonData.GetProperty("balance").GetInt32();
-        return new GetUserBalanceResult(process, balance);
+        return new GetUserBalanceResult(true, balance);
     }
 
     public ValueTask<PlatformLoginResult> PlatformLoginAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, CancellationToken cancellationToken = default)
