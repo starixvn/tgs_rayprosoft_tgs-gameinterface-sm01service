@@ -242,15 +242,14 @@ internal class GameApiClient : IGameApiClient
         if (!process)
         {
             _ = document.RootElement.TryGetProperty("code", out var jsonCode);
-            var errorCode = jsonCode.GetInt32();
+            var errorCode = jsonCode.ToString();
 
             _ = document.RootElement.TryGetProperty("result", out var jsonResult);
             var errorMessage = jsonResult.ToString();
 
-            _logger.LogError("getUserBalance failed, errorCode:{errorCode}, errorMessage:{errorMessage}",errorCode,errorMessage);
-            return new GetUserBalanceResult(false, 0);            
+            _logger.LogError("getUserBalance failed, errorCode:{errorCode}, errorMessage:{errorMessage}", errorCode, errorMessage);
+            return new GetUserBalanceResult(false, 0);
         }
-
 
         if (!document.RootElement.TryGetProperty("data", out var jsonData))
         {
