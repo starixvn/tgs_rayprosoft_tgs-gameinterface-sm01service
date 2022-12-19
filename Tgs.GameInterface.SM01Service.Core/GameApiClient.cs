@@ -234,7 +234,7 @@ internal class GameApiClient : IGameApiClient
 
         if (!document.RootElement.TryGetProperty("process", out var jsonProcess))
         {
-            return new GetUserBalanceResult(false, 0);
+            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
         }
 
         var process = jsonProcess.ToString() == "success";
@@ -247,8 +247,10 @@ internal class GameApiClient : IGameApiClient
             _ = document.RootElement.TryGetProperty("result", out var jsonResult);
             var errorMessage = jsonResult.ToString();
 
-            throw new GameProviderResponseErrorException(errorCode.ToString(), errorMessage);
+            _logger.LogError("getUserBalance failed, errorCode:{errorCode}, errorMessage:{errorMessage}",errorCode,errorMessage);
+            return new GetUserBalanceResult(false, 0);            
         }
+
 
         if (!document.RootElement.TryGetProperty("data", out var jsonData))
         {
@@ -256,7 +258,7 @@ internal class GameApiClient : IGameApiClient
         }
 
         var balance = jsonData.GetProperty("balance").GetInt32();
-        return new GetUserBalanceResult(process, balance);
+        return new GetUserBalanceResult(true, balance);
     }
 
     public ValueTask<PlatformLoginResult> PlatformLoginAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, CancellationToken cancellationToken = default)
