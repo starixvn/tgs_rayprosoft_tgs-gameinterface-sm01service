@@ -234,7 +234,7 @@ internal class GameApiClient : IGameApiClient
 
         if (!document.RootElement.TryGetProperty("process", out var jsonProcess))
         {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
+            return new GetUserBalanceResult(false, 0);
         }
 
         var process = jsonProcess.ToString() == "success";
