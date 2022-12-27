@@ -14,6 +14,7 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
         private readonly ICommandService<PlayerCreateCommand> _playerCreateService;
         private readonly IGetService<PlayerBalanceQuery, PlayerBalanceResult> _playerBalanceService;
         private readonly IQueryService<GameHistorySettledQuery, GameHistorySettledResult> _gameHistorySettledService;
+        private readonly IGetService<PlatformLoginQuery, PlatformLoginResult> _platformLoginService;
 
         public GameInterfaceSM01GrpcService(
             IGetService<FundInQuery, FundResult> fundInService,
@@ -21,7 +22,8 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
             IQueryService<FundHistoryQuery, FundHistoryResult> fundHistoryService,
             ICommandService<PlayerCreateCommand> playerCreateService,
             IGetService<PlayerBalanceQuery, PlayerBalanceResult> playerBalanceService,
-            IQueryService<GameHistorySettledQuery, GameHistorySettledResult> gameHistorySettledService)
+            IQueryService<GameHistorySettledQuery, GameHistorySettledResult> gameHistorySettledService,
+            IGetService<PlatformLoginQuery, PlatformLoginResult> platformLoginService)
         {
             _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
             _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
@@ -29,6 +31,30 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
             _playerCreateService = playerCreateService ?? throw new ArgumentNullException(nameof(playerCreateService));
             _playerBalanceService = playerBalanceService ?? throw new ArgumentNullException(nameof(playerBalanceService));
             _gameHistorySettledService = gameHistorySettledService ?? throw new ArgumentNullException(nameof(gameHistorySettledService));
+            _platformLoginService = platformLoginService ?? throw new ArgumentNullException(nameof(platformLoginService));
+        }
+
+        public override async Task<PlatformLoginReply> PlatformLogin(PlatformLoginRequest request, ServerCallContext context)
+        {
+            var query = new PlatformLoginQuery(
+                ApiUrl: new Uri(request.ApiUrl),
+                MerchantId: request.MerchantId,
+                MerchantKey: request.MerchantKey,
+                CustomerName: request.CustomerName);
+
+            var result = await _platformLoginService
+                .GetAsync(
+                    query: query,
+                    cancellationToken: context.CancellationToken)
+                .ConfigureAwait(false);
+
+            return new PlatformLoginReply()
+            {
+                CustomerName = result.CustomerName,
+                MerchantId = result.MerchantId,
+                Sign = result.Sign,
+                Timestamp = result.Timestamp
+            };
         }
 
         public override async Task<FundReply> FundIn(FundRequest request, ServerCallContext context)
