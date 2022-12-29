@@ -38,6 +38,8 @@ internal class GameHistorySettledQueryService : IQueryService<GameHistorySettled
             yield return new GameHistorySettledResult(
                 PlayerCode: bettingHistoryBet.PlayerCode,
                 ExternalRoundId: bettingHistoryBet.BetId,                
+                //ExternalCreatedOn: new DateTimeOffset(bettingHistoryBet.CreateAt,TimeSpan.FromHours(8)),
+                //ExternalClosedOn: new  DateTimeOffset(bettingHistoryBet.UpdateAt,TimeSpan.FromHours(8)),
                 ExternalCreatedOn: bettingHistoryBet.CreateAt,
                 ExternalClosedOn: bettingHistoryBet.UpdateAt,
                 Bet: bettingHistoryBet.BetAmount,
