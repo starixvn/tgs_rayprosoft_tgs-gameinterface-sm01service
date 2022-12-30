@@ -37,17 +37,15 @@ internal class GameHistorySettledQueryService : IQueryService<GameHistorySettled
             
             yield return new GameHistorySettledResult(
                 PlayerCode: bettingHistoryBet.PlayerCode,
-                ExternalRoundId: bettingHistoryBet.BetId,                
-                //ExternalCreatedOn: new DateTimeOffset(bettingHistoryBet.CreateAt,TimeSpan.FromHours(8)),
-                //ExternalClosedOn: new  DateTimeOffset(bettingHistoryBet.UpdateAt,TimeSpan.FromHours(8)),
-                ExternalCreatedOn: bettingHistoryBet.CreateAt,
-                ExternalClosedOn: bettingHistoryBet.UpdateAt,
-                Bet: bettingHistoryBet.BetAmount,
-                ValidBet: bettingHistoryBet.BetAmount,
+                ExternalRoundId: bettingHistoryBet.ExternalRoundId,
+                ExternalCreatedOn: bettingHistoryBet.ExternalCreatedOn,
+                ExternalClosedOn: bettingHistoryBet.ExternalClosedOn,
+                Bet: bettingHistoryBet.Bet,
+                ValidBet: bettingHistoryBet.Bet,
                 PlayerWinLoss: decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),
-                Turnover: bettingHistoryBet.BetAmount,
-                Settle: bettingHistoryBet.BetAmount + decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),
-                AdditionalData: JsonSerializer.Serialize(bettingHistoryBet));
+                Turnover: bettingHistoryBet.Bet,
+                Settle: bettingHistoryBet.Bet + decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),
+                AdditionalData: bettingHistoryBet.AdditionalData);
         }
     }
 }

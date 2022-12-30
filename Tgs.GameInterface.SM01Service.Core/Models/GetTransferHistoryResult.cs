@@ -1,23 +1,12 @@
-﻿using System.Globalization;
-using System;
-using System.Text.Json.Serialization;
-
-namespace Tgs.GameInterface.SM01Service.Core.Models;
+﻿namespace Tgs.GameInterface.SM01Service.Core.Models;
 
 public record GetTransferHistoryResult
 {
-    [JsonPropertyName("merchant_transaction_id")]
-    public string TransactionId { get; set; } = default!;
+    public string TransactionId { get; init; } = default!;
 
-    [JsonPropertyName("amount")]
-    public int Amount { get; set; }
+    public int Amount { get; init; }
 
-    [JsonPropertyName("customerName")]
-    public string CustomerName { get; set; } = default!;
+    public string CustomerName { get; init; } = default!;
 
-    [JsonPropertyName("created_time")]
-    public string _createdTime { get; init; } = default!;
-
-    [JsonIgnore]
-    public DateTime CreatedTime => DateTime.ParseExact(_createdTime, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);    
+    public DateTime CreatedTime { get; init; }
 }

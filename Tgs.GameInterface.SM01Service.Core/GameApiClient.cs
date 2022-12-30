@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
 using Tgs.GameInterface.SM01Service.Core.Exceptions;
 using Tgs.GameInterface.SM01Service.Core.Models;
@@ -34,43 +36,28 @@ internal class GameApiClient : IGameApiClient
 
         var url = new Uri(apiUrl, "/api/merchant/checkUser");
 
-        var document = await PostAsync(
+        var jsonNode = await PostAsync(
             url,
             parameters,
             "CheckUser",
             cancellationToken).ConfigureAwait(false);
 
-        if (document is null)
-        {
-            throw new Exception("Document is empty.");
-        }
-
-        if (!document.RootElement.TryGetProperty("process", out var jsonProcess))
-        {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
-        }
-
-        var process = jsonProcess.ToString() == "success";
+        var process = jsonNode["process"]!.ToString() == "success";
 
         if (!process)
         {
-            _ = document.RootElement.TryGetProperty("code", out var jsonCode);
-            var errorCode = jsonCode.GetInt32();
+            var errorCode = jsonNode["code"]!.GetValue<int>();
 
-            _ = document.RootElement.TryGetProperty("result", out var jsonResult);
-            var errorMessage = jsonResult.ToString();
+            var errorMessage = jsonNode["result"]!.ToString();
 
             throw new GameProviderResponseErrorException(errorCode.ToString(), errorMessage);
         }
 
-        if (!document.RootElement.TryGetProperty("data", out var jsonData))
-        {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
-        }
+        var state = jsonNode["data"]!["state"]!.GetValue<int>();//狀態：1正常 2凍結 0禁用
 
-        var state = jsonData.GetProperty("state").GetInt32() == 1;//狀態：1正常 2凍結 0禁用
+        var isPlayerExist = state == 1;
 
-        return new CheckUserResult(state);
+        return new CheckUserResult(isPlayerExist);
     }
 
     public async IAsyncEnumerable<GetTransationsHistoryResult> GetTransationsHistoryAsync(Uri apiUrl, string merchantId, string merchantKey, DateTime startDate, DateTime endDate, [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -88,43 +75,45 @@ internal class GameApiClient : IGameApiClient
 
         var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
 
-        var document = await PostAsync(
+        var jsonNode = await PostAsync(
             url,
             parameters,
             "GetTransationsHistory",
             cancellationToken).ConfigureAwait(false);
 
-        if (document is null)
-        {
-            throw new Exception("Document is empty.");
-        }
-
-        if (!document.RootElement.TryGetProperty("process", out var jsonProcess))
-        {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
-        }
-
-        var process = jsonProcess.ToString() == "success";
+        var process = jsonNode["process"]!.ToString() == "success";
 
         if (!process)
         {
-            _ = document.RootElement.TryGetProperty("code", out var jsonCode);
-            var errorCode = jsonCode.GetInt32();
+            var errorCode = jsonNode["code"]!.GetValue<int>();
 
-            _ = document.RootElement.TryGetProperty("result", out var jsonResult);
-            var errorMessage = jsonResult.ToString();
+            var errorMessage = jsonNode["result"]!.ToString();
 
             throw new GameProviderResponseErrorException(errorCode.ToString(), errorMessage);
         }
-        if (!document.RootElement.TryGetProperty("data", out var jsonData))
+
+        var data = jsonNode["data"];
+
+        if (data is null)
+            yield break;
+
+        IEnumerable<GetTransationsHistoryResult> results = new List<GetTransationsHistoryResult>();
+
+        if (data["list"] is not null && (data["list"]?.AsArray().Any() ?? false))
         {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
+            var array = data["list"]!.AsArray();
+
+            results = array.Select(x => new GetTransationsHistoryResult
+            {
+                PlayerCode = x!["customerName"]!.ToString(),
+                ExternalRoundId = x!["bet_id"]!.ToString(),
+                ExternalCreatedOn = new DateTimeOffset(DateTime.ParseExact(x!["create_at"]!.ToString(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D)),
+                ExternalClosedOn = new DateTimeOffset(DateTime.ParseExact(x!["update_at"]!.ToString(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D)),
+                WinOrLost = x!["win_or_lost"]!.GetValue<int>(),
+                Bet = x!["bet_amount"]!.GetValue<decimal>(),
+                AdditionalData = x.ToString(),
+            });
         }
-
-        var list = jsonData.GetProperty("list").GetRawText();
-
-        var results = JsonSerializer.Deserialize<IEnumerable<GetTransationsHistoryResult>>(list)
-           ?? Enumerable.Empty<GetTransationsHistoryResult>();
 
         if (!results.Any())
         {
@@ -158,43 +147,42 @@ internal class GameApiClient : IGameApiClient
 
         var url = new Uri(apiUrl, "/api/merchant/getTransferHistory");
 
-        var document = await PostAsync(
+        var jsonNode = await PostAsync(
             url,
             parameters,
             "GetTransferHistory",
             cancellationToken).ConfigureAwait(false);
 
-        if (document is null)
-        {
-            throw new Exception("Document is empty.");
-        }
-
-        if (!document.RootElement.TryGetProperty("process", out var jsonProcess))
-        {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
-        }
-
-        var process = jsonProcess.ToString() == "success";
+        var process = jsonNode["process"]!.ToString() == "success";
 
         if (!process)
         {
-            _ = document.RootElement.TryGetProperty("code", out var jsonCode);
-            var errorCode = jsonCode.ToString();
+            var errorCode = jsonNode["code"]!.ToString();
 
-            _ = document.RootElement.TryGetProperty("result", out var jsonResult);
-            var errorMessage = jsonResult.ToString();
+            var errorMessage = jsonNode["result"]!.ToString();
 
             throw new GameProviderResponseErrorException(errorCode, errorMessage);
         }
-        if (!document.RootElement.TryGetProperty("data", out var jsonData))
+
+        var data = jsonNode["data"];
+
+        if (data is null)
+            yield break;
+
+        IEnumerable<GetTransferHistoryResult> results = new List<GetTransferHistoryResult>();
+
+        if (data["list"] is not null && (data["list"]?.AsArray().Any() ?? false))
         {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
+            var array = data["list"]!.AsArray();
+
+            results = array.Select(x => new GetTransferHistoryResult
+            {
+                TransactionId = x!["merchant_transaction_id"]!.ToString(),
+                Amount = x["amount"]!.GetValue<int>(),
+                CustomerName = x["customerName"]!.ToString(),
+                CreatedTime = DateTime.ParseExact(x["created_time"]!.ToString(), "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture),
+            });
         }
-
-        var list = jsonData.GetProperty("list").GetRawText();
-
-        var results = JsonSerializer.Deserialize<IEnumerable<GetTransferHistoryResult>>(list)
-           ?? Enumerable.Empty<GetTransferHistoryResult>();
 
         if (!results.Any())
         {
@@ -221,42 +209,31 @@ internal class GameApiClient : IGameApiClient
 
         var url = new Uri(apiUrl, "/api/merchant/getUserBalance");
 
-        var document = await PostAsync(
+        var jsonNode = await PostAsync(
             url,
             parameters,
             "GetUserBalance",
             cancellationToken).ConfigureAwait(false);
 
-        if (document is null)
-        {
-            throw new Exception("Document is empty.");
-        }
-
-        if (!document.RootElement.TryGetProperty("process", out var jsonProcess))
-        {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
-        }
-
-        var process = jsonProcess.ToString() == "success";
+        var process = jsonNode["process"]!.ToString() == "success";
 
         if (!process)
         {
-            _ = document.RootElement.TryGetProperty("code", out var jsonCode);
-            var errorCode = jsonCode.ToString();
+            var errorCode = jsonNode["code"]!.ToString();
 
-            _ = document.RootElement.TryGetProperty("result", out var jsonResult);
-            var errorMessage = jsonResult.ToString();
+            var errorMessage = jsonNode["result"]!.ToString();
 
             _logger.LogError("getUserBalance failed, errorCode:{errorCode}, errorMessage:{errorMessage}", errorCode, errorMessage);
             return new GetUserBalanceResult(false, 0);
         }
 
-        if (!document.RootElement.TryGetProperty("data", out var jsonData))
-        {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
-        }
+        var data = jsonNode["data"];
 
-        var balance = jsonData.GetProperty("balance").GetInt32();
+        if (data is null)
+            return new GetUserBalanceResult(false, 0);
+
+        var balance = data["balance"]!.GetValue<int>();
+
         return new GetUserBalanceResult(true, balance);
     }
 
@@ -293,41 +270,32 @@ internal class GameApiClient : IGameApiClient
 
         var url = new Uri(apiUrl, "/api/merchant/transferIn");
 
-        var document = await PostAsync(
+        var jsonNode = await PostAsync(
             url,
             parameters,
             "TransferIn",
             cancellationToken).ConfigureAwait(false);
 
-        if (document is null)
-        {
-            throw new Exception("Document is empty.");
-        }
-
-        if (!document.RootElement.TryGetProperty("process", out var jsonProcess))
-        {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
-        }
-
-        var process = jsonProcess.ToString() == "success";
+        var process = jsonNode["process"]!.ToString() == "success";
 
         if (!process)
         {
-            _ = document.RootElement.TryGetProperty("code", out var jsonCode);
-            var errorCode = jsonCode.GetInt32();
+            var errorCode = jsonNode["code"]!.GetValue<int>();
 
-            _ = document.RootElement.TryGetProperty("result", out var jsonResult);
-            var errorMessage = jsonResult.ToString();
+            var errorMessage = jsonNode["result"]!.ToString();
 
             throw new GameProviderResponseErrorException(errorCode.ToString(), errorMessage);
         }
 
-        if (!document.RootElement.TryGetProperty("data", out var jsonData))
+        var data = jsonNode["data"];
+
+        if (data is null)
         {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
+            _logger.LogInformation("SM01 TransferIn data is null");
+            return new TransferInResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), 0);
         }
 
-        var balance = jsonData.GetProperty("balance").GetInt32();
+        var balance = data["balance"]!.GetValue<int>();
 
         return new TransferInResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), balance);
     }
@@ -348,45 +316,36 @@ internal class GameApiClient : IGameApiClient
 
         var url = new Uri(apiUrl, "/api/merchant/transferOut");
 
-        var document = await PostAsync(
+        var jsonNode = await PostAsync(
             url,
             parameters,
             "TransferOut",
             cancellationToken).ConfigureAwait(false);
 
-        if (document is null)
-        {
-            throw new Exception("Document is empty.");
-        }
-
-        if (!document.RootElement.TryGetProperty("process", out var jsonProcess))
-        {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
-        }
-
-        var process = jsonProcess.ToString() == "success";
+        var process = jsonNode["process"]!.ToString() == "success";
 
         if (!process)
         {
-            _ = document.RootElement.TryGetProperty("code", out var jsonCode);
-            var errorCode = jsonCode.GetInt32();
+            var errorCode = jsonNode["code"]!.GetValue<int>();
 
-            _ = document.RootElement.TryGetProperty("result", out var jsonResult);
-            var errorMessage = jsonResult.ToString();
+            var errorMessage = jsonNode["result"]!.ToString();
 
             throw new GameProviderResponseErrorException(errorCode.ToString(), errorMessage);
         }
 
-        if (!document.RootElement.TryGetProperty("data", out var jsonData))
+        var data = jsonNode["data"];
+        if (data is null)
         {
-            throw new Exception($"JsonElement parsing failed.({JsonSerializer.Serialize(document)})");
+            _logger.LogInformation("SM01 TransferOut data is null");
+            return new TransferOutResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), 0);
         }
 
-        var balance = jsonData.GetProperty("balance").GetInt32();
+        var balance = data["balance"]!.GetValue<int>();
+
         return new TransferOutResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), balance);
     }
 
-    private async ValueTask<JsonDocument> PostAsync(Uri apiUrl, IEnumerable<KeyValuePair<string, string>> parameters, string logPrefix, CancellationToken cancellationToken = default)
+    private async ValueTask<JsonNode> PostAsync(Uri apiUrl, IEnumerable<KeyValuePair<string, string>> parameters, string logPrefix, CancellationToken cancellationToken = default)
     {
         logPrefix = $"{nameof(GameApiClient)}.{logPrefix}".ToLower();
 
@@ -424,6 +383,6 @@ internal class GameApiClient : IGameApiClient
 
         _ = httpResponseMessage.EnsureSuccessStatusCode();
 
-        return JsonDocument.Parse(responseMessage);
+        return JsonNode.Parse(responseMessage)!;
     }
 }
