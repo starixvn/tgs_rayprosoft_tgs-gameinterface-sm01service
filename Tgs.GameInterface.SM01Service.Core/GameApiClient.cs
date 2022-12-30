@@ -79,8 +79,8 @@ internal class GameApiClient : IGameApiClient
         {
             ["merchantId"] = merchantId,
             ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
-            ["StartDate"] = startDate.ToString("yyyy-MM-dd HH:mm:ss"),
-            ["EndDate"] = endDate.ToString("yyyy-MM-dd HH:mm:ss"),
+            ["StartDate"] = startDate.DatetimeConvertToString(),
+            ["EndDate"] = endDate.DatetimeConvertToString(),
         };
 
         var sign = SM01Hasher.ComputeHash(merchantKey, parameters);
