@@ -21,13 +21,13 @@ public record GetTransationsHistoryResult
     public string _createAt { get; init; } = default!;
 
     [JsonIgnore]
-    public DateTimeOffset CreateAt => new( DateTime.ParseExact(_createAt, "yyyy-MM-dd HH:mm:ss",  CultureInfo.InvariantCulture),TimeSpan.FromHours(-8D));
+    public DateTimeOffset CreateAt => new(DateTime.ParseExact(_createAt, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D));
 
     [JsonPropertyName("update_at")]
     public string _updateAt { get; init; } = default!;
 
     [JsonIgnore]
-    public DateTimeOffset UpdateAt => new(DateTime.ParseExact(_updateAt, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(-8D));
+    public DateTimeOffset UpdateAt => new(DateTime.ParseExact(_updateAt, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D));
 
     [JsonPropertyName("winner")]
     public string Winner { get; init; } = default!;
