@@ -1,23 +1,22 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Text.Json;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices;
 
-internal class GameHistorySettledQueryService : IQueryService<GameHistorySettledQuery, GameHistorySettledResult>
+internal class GameSettledHistoryQueryService : IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult>
 {
     private readonly IGameApiClient _client;
 
-    public GameHistorySettledQueryService(
+    public GameSettledHistoryQueryService(
         IGameApiClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
-    public async IAsyncEnumerable<GameHistorySettledResult> QueryAsync(GameHistorySettledQuery query, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<GameSettledHistoryResult> QueryAsync(GameSettledHistoryQuery query, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var bettingHistoryBets = await _client
-                .GetTransationsHistoryAsync(
+                .GetSettledTransationsHistoryAsync(
                     apiUrl: query.ApiUrl,
                     merchantId: query.MerchantId,
                     merchantKey: query.MerchantKey,
@@ -34,8 +33,7 @@ internal class GameHistorySettledQueryService : IQueryService<GameHistorySettled
 
         foreach (var bettingHistoryBet in bettingHistoryBets)
         {
-            
-            yield return new GameHistorySettledResult(
+            yield return new GameSettledHistoryResult(
                 PlayerCode: bettingHistoryBet.PlayerCode,
                 ExternalRoundId: bettingHistoryBet.ExternalRoundId,
                 ExternalCreatedOn: bettingHistoryBet.ExternalCreatedOn,

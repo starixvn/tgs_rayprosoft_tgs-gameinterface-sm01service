@@ -53,7 +53,15 @@ public interface IGameInterfaceSM01Client
         string customerName,
         CancellationToken cancellationToken = default);
 
-    IAsyncEnumerable<GameHistorySettled> GameHistorySettledAsync(
+    IAsyncEnumerable<GameSettledHistory> GameSettledHistoryAsync(
+        Uri apiUrl,
+        string merchantId,
+        string merchantKey,
+        DateTime startDate,
+        DateTime endDate,
+        CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<GameUnsettleHistory> GameUnsettleHistoryAsync(
         Uri apiUrl,
         string merchantId,
         string merchantKey,

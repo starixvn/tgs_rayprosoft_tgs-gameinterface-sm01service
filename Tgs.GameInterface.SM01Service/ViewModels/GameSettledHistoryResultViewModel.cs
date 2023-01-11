@@ -1,10 +1,10 @@
-﻿namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices;
+﻿namespace Tgs.GameInterface.SM01Service.ViewModels;
 
-public record GameHistorySettledResult(
+public record GameSettledHistoryResultViewModel(
     string PlayerCode,
-    string ExternalRoundId,    
+    string ExternalRoundId,
     DateTimeOffset ExternalCreatedOn,
-    DateTimeOffset ExternalClosedOn,
+    DateTimeOffset? ExternalClosedOn,
     decimal Bet,
     decimal ValidBet,
     decimal PlayerWinLoss,

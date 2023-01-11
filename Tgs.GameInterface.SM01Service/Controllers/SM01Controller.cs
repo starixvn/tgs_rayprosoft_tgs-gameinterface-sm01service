@@ -288,12 +288,12 @@ public class SM01Controller : ControllerBase
     ///             "endDate": "2022-12-12T12:00:58.148Z"
     ///         }
     /// </remarks>
-    [HttpPost("game/history/settled", Name = "GameHistorySettled")]
-    public async IAsyncEnumerable<GameHistorySettledResultViewModel> GameHistorySettledAsync(
-        [FromServices] IQueryService<GameHistorySettledQuery, GameHistorySettledResult> service,
-        GameHistorySettledViewModel model)
+    [HttpPost("game/history/settled", Name = "GameSettledHistory")]
+    public async IAsyncEnumerable<GameSettledHistoryResultViewModel> GameSettledHistoryAsync(
+        [FromServices] IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> service,
+        GameSettledHistoryViewModel model)
     {
-        var query = new GameHistorySettledQuery(
+        var query = new GameSettledHistoryQuery(
             ApiUrl: model.ApiUrl,
             model.MerchantId,
             model.MerchantKey,
@@ -315,7 +315,7 @@ public class SM01Controller : ControllerBase
 
         foreach (var gameRecord in gameRecords)
         {
-            yield return new GameHistorySettledResultViewModel(
+            yield return new GameSettledHistoryResultViewModel(
                 PlayerCode: gameRecord.PlayerCode,
                 ExternalRoundId: gameRecord.ExternalRoundId,
                 ExternalCreatedOn: gameRecord.ExternalCreatedOn,
@@ -325,6 +325,62 @@ public class SM01Controller : ControllerBase
                 PlayerWinLoss: gameRecord.PlayerWinLoss,
                 Turnover: gameRecord.Turnover,
                 Settle: gameRecord.Settle,
+                AdditionalData: gameRecord.AdditionalData);
+        }
+    }
+
+    /// <summary>
+    /// Games the unsettle history asynchronous.
+    /// </summary>
+    /// <param name="service">The service.</param>
+    /// <param name="model">The model.</param>
+    /// <returns></returns>
+    /// <remarks>
+    /// <b>Example</b><br />
+    ///
+    ///     Post
+    ///
+    ///         {
+    ///             "apiUrl": "https://cn.ucfclive.com",
+    ///             "merchantId": "SQjCxm2cX5bahBta",
+    ///             "merchantKey": "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb",
+    ///             "startDate": "2022-12-12T11:30:58.148Z",
+    ///             "endDate": "2022-12-12T12:00:58.148Z"
+    ///         }
+    /// </remarks>
+    [HttpPost("game/history/unsettle", Name = "GameUnsettleHistory")]
+    public async IAsyncEnumerable<GameUnsettleHistoryResultViewModel> GameUnsettleHistoryAsync(
+        [FromServices] IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> service,
+        GameUnsettleHistoryViewModel model)
+    {
+        var query = new GameUnsettleHistoryQuery(
+            ApiUrl: model.ApiUrl,
+            model.MerchantId,
+            model.MerchantKey,
+            StartDate: model.StartDate,
+            EndDate: model.EndDate);
+
+        var gameRecords = await service
+                .QueryAsync(
+                    query: query,
+                    cancellationToken: HttpContext.RequestAborted)
+                .ToArrayAsync(
+                    cancellationToken: HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+
+        if (!gameRecords.Any())
+        {
+            yield break;
+        }
+
+        foreach (var gameRecord in gameRecords)
+        {
+            yield return new GameUnsettleHistoryResultViewModel(
+                PlayerCode: gameRecord.PlayerCode,
+                ExternalRoundId: gameRecord.ExternalRoundId,
+                ExternalCreatedOn: gameRecord.ExternalCreatedOn,
+                Bet: gameRecord.Bet,
+                ValidBet: gameRecord.ValidBet,
                 AdditionalData: gameRecord.AdditionalData);
         }
     }

@@ -89,7 +89,7 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
         }
     }
 
-    public async IAsyncEnumerable<GameHistorySettled> GameHistorySettledAsync(
+    public async IAsyncEnumerable<GameSettledHistory> GameSettledHistoryAsync(
         Uri apiUrl,
         string merchantId,
         string merchantKey,
@@ -97,7 +97,7 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
         DateTime endDate,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var request = new GameHistorySettledRequest()
+        var request = new GameSettledHistoryRequest()
         {
             ApiUrl = apiUrl.ToString(),
             MerchantId = merchantId,
@@ -107,7 +107,41 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
         };
 
         var reply = await _client
-                .GameHistorySettledAsync(
+                .GameSettledHistoryAsync(
+                    request: request,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+
+        if (!reply.Items.Any())
+        {
+            yield break;
+        }
+
+        foreach (var item in reply.Items)
+        {
+            yield return item;
+        }
+    }
+
+    public async IAsyncEnumerable<GameUnsettleHistory> GameUnsettleHistoryAsync(
+        Uri apiUrl,
+        string merchantId,
+        string merchantKey,
+        DateTime startDate,
+        DateTime endDate,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var request = new GameUnsettleHistoryRequest()
+        {
+            ApiUrl = apiUrl.ToString(),
+            MerchantId = merchantId,
+            MerchantKey = merchantKey,
+            StartDate = startDate.ToTimestamp(),
+            EndDate = endDate.ToTimestamp()
+        };
+
+        var reply = await _client
+                .GameUnsettleHistoryAsync(
                     request: request,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);

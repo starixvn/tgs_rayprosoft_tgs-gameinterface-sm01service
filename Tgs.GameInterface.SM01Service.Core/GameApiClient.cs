@@ -60,7 +60,7 @@ internal class GameApiClient : IGameApiClient
         return new CheckUserResult(isPlayerExist);
     }
 
-    public async IAsyncEnumerable<GetTransationsHistoryResult> GetTransationsHistoryAsync(Uri apiUrl, string merchantId, string merchantKey, DateTime startDate, DateTime endDate, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<GetSettledTransationsHistoryResult> GetSettledTransationsHistoryAsync(Uri apiUrl, string merchantId, string merchantKey, DateTime startDate, DateTime endDate, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var parameters = new Dictionary<string, string>
         {
@@ -68,6 +68,7 @@ internal class GameApiClient : IGameApiClient
             ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
             ["StartDate"] = startDate.DatetimeConvertToString(),
             ["EndDate"] = endDate.DatetimeConvertToString(),
+            ["isResult"] = 1.ToString(),//1:settlement
         };
 
         var sign = SM01Hasher.ComputeHash(merchantKey, parameters);
@@ -78,7 +79,7 @@ internal class GameApiClient : IGameApiClient
         var jsonNode = await PostAsync(
             url,
             parameters,
-            "GetTransationsHistory",
+            "GetSettledTransationsHistory",
             cancellationToken).ConfigureAwait(false);
 
         var process = jsonNode["process"]!.ToString() == "success";
@@ -97,18 +98,84 @@ internal class GameApiClient : IGameApiClient
         if (data is null)
             yield break;
 
-        IEnumerable<GetTransationsHistoryResult> results = new List<GetTransationsHistoryResult>();
+        IEnumerable<GetSettledTransationsHistoryResult> results = new List<GetSettledTransationsHistoryResult>();
 
         if (data["list"] is not null && (data["list"]?.AsArray().Any() ?? false))
         {
             var array = data["list"]!.AsArray();
 
-            results = array.Select(x => new GetTransationsHistoryResult
+            results = array.Select(x => new GetSettledTransationsHistoryResult
             {
                 PlayerCode = x!["customerName"]!.ToString(),
                 ExternalRoundId = x!["bet_id"]!.ToString(),
                 ExternalCreatedOn = new DateTimeOffset(DateTime.ParseExact(x!["create_at"]!.ToString(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D)),
                 ExternalClosedOn = new DateTimeOffset(DateTime.ParseExact(x!["update_at"]!.ToString(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D)),
+                WinOrLost = x!["win_or_lost"]!.GetValue<int>(),
+                Bet = x!["bet_amount"]!.GetValue<decimal>(),
+                AdditionalData = x.ToString(),
+            });
+        }
+
+        if (!results.Any())
+        {
+            yield break;
+        }
+
+        foreach (var result in results)
+        {
+            yield return result;
+        }
+    }
+
+    public async IAsyncEnumerable<GetUnsettleTransationsHistoryResult> GetUnsettleTransationsHistoryAsync(Uri apiUrl, string merchantId, string merchantKey, DateTime startDate, DateTime endDate, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var parameters = new Dictionary<string, string>
+        {
+            ["merchantId"] = merchantId,
+            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
+            ["StartDate"] = startDate.DatetimeConvertToString(),
+            ["EndDate"] = endDate.DatetimeConvertToString(),
+            ["isResult"] = 2.ToString(),//2：unsettlement
+        };
+
+        var sign = SM01Hasher.ComputeHash(merchantKey, parameters);
+        parameters.Add("sign", sign);
+
+        var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
+
+        var jsonNode = await PostAsync(
+            url,
+            parameters,
+            "GetUnsettleTransationsHistory",
+            cancellationToken).ConfigureAwait(false);
+
+        var process = jsonNode["process"]!.ToString() == "success";
+
+        if (!process)
+        {
+            var errorCode = jsonNode["code"]!.GetValue<int>();
+
+            var errorMessage = jsonNode["result"]!.ToString();
+
+            throw new GameProviderResponseErrorException(errorCode.ToString(), errorMessage);
+        }
+
+        var data = jsonNode["data"];
+
+        if (data is null)
+            yield break;
+
+        IEnumerable<GetUnsettleTransationsHistoryResult> results = new List<GetUnsettleTransationsHistoryResult>();
+
+        if (data["list"] is not null && (data["list"]?.AsArray().Any() ?? false))
+        {
+            var array = data["list"]!.AsArray();
+
+            results = array.Select(x => new GetUnsettleTransationsHistoryResult
+            {
+                PlayerCode = x!["customerName"]!.ToString(),
+                ExternalRoundId = x!["bet_id"]!.ToString(),
+                ExternalCreatedOn = new DateTimeOffset(DateTime.ParseExact(x!["create_at"]!.ToString(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D)),
                 WinOrLost = x!["win_or_lost"]!.GetValue<int>(),
                 Bet = x!["bet_amount"]!.GetValue<decimal>(),
                 AdditionalData = x.ToString(),
