@@ -1,6 +1,6 @@
 ﻿namespace Tgs.GameInterface.SM01Service.ViewModels;
 
-public record GameHistorySettledViewModel(
+public record GameUnsettleHistoryViewModel(
     Uri ApiUrl,
     string MerchantId,
     string MerchantKey,

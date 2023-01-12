@@ -14,7 +14,9 @@ public interface IGameApiClient
 
     IAsyncEnumerable<GetTransferHistoryResult> GetTransferHistoryAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, bool isFundOut, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
 
-    IAsyncEnumerable<GetTransationsHistoryResult> GetTransationsHistoryAsync(Uri apiUrl, string merchantId, string merchantKey, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
+    IAsyncEnumerable<GetSettledTransationsHistoryResult> GetSettledTransationsHistoryAsync(Uri apiUrl, string merchantId, string merchantKey, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
+
+    IAsyncEnumerable<GetUnsettleTransationsHistoryResult> GetUnsettleTransationsHistoryAsync(Uri apiUrl, string merchantId, string merchantKey, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
 
     ValueTask<GetUserBalanceResult> GetUserBalanceAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, CancellationToken cancellationToken = default);
 }

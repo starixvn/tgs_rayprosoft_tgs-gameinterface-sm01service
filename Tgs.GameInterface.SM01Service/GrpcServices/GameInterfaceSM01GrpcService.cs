@@ -13,7 +13,8 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
         private readonly IQueryService<FundHistoryQuery, FundHistoryResult> _fundHistoryService;
         private readonly ICommandService<PlayerCreateCommand> _playerCreateService;
         private readonly IGetService<PlayerBalanceQuery, PlayerBalanceResult> _playerBalanceService;
-        private readonly IQueryService<GameHistorySettledQuery, GameHistorySettledResult> _gameHistorySettledService;
+        private readonly IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> _gameSettledHistoryService;
+        private readonly IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> _gameUnsettleHistorySerivce;
         private readonly IGetService<PlatformLoginQuery, PlatformLoginResult> _platformLoginService;
 
         public GameInterfaceSM01GrpcService(
@@ -22,7 +23,8 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
             IQueryService<FundHistoryQuery, FundHistoryResult> fundHistoryService,
             ICommandService<PlayerCreateCommand> playerCreateService,
             IGetService<PlayerBalanceQuery, PlayerBalanceResult> playerBalanceService,
-            IQueryService<GameHistorySettledQuery, GameHistorySettledResult> gameHistorySettledService,
+            IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> gameSettledHistorySerivce,
+            IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> gameUnsettleHistorySerivce,
             IGetService<PlatformLoginQuery, PlatformLoginResult> platformLoginService)
         {
             _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
@@ -30,7 +32,8 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
             _fundHistoryService = fundHistoryService ?? throw new ArgumentNullException(nameof(fundHistoryService));
             _playerCreateService = playerCreateService ?? throw new ArgumentNullException(nameof(playerCreateService));
             _playerBalanceService = playerBalanceService ?? throw new ArgumentNullException(nameof(playerBalanceService));
-            _gameHistorySettledService = gameHistorySettledService ?? throw new ArgumentNullException(nameof(gameHistorySettledService));
+            _gameSettledHistoryService = gameSettledHistorySerivce ?? throw new ArgumentNullException(nameof(gameSettledHistorySerivce));
+            _gameUnsettleHistorySerivce = gameUnsettleHistorySerivce ?? throw new ArgumentNullException(nameof(gameUnsettleHistorySerivce));
             _platformLoginService = platformLoginService ?? throw new ArgumentNullException(nameof(platformLoginService));
         }
 
@@ -182,28 +185,28 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
             };
         }
 
-        public override async Task<GameHistorySettledReply> GameHistorySettled(GameHistorySettledRequest request, ServerCallContext context)
+        public override async Task<GameSettledHistoryReply> GameSettledHistory(GameSettledHistoryRequest request, ServerCallContext context)
         {
-            var query = new GameHistorySettledQuery(
+            var query = new GameSettledHistoryQuery(
                 ApiUrl: new(request.ApiUrl),
                 MerchantId: request.MerchantId,
                 MerchantKey: request.MerchantKey,
                 StartDate: request.StartDate.ToDateTime(),
                 EndDate: request.EndDate.ToDateTime());
 
-            var gameHistorySettleds = await _gameHistorySettledService
+            var gameHistorySettleds = await _gameSettledHistoryService
                     .QueryAsync(
                         query: query,
                         cancellationToken: context.CancellationToken)
                     .ToArrayAsync(context.CancellationToken)
                     .ConfigureAwait(false);
-            var reply = new GameHistorySettledReply();
+            var reply = new GameSettledHistoryReply();
 
             if (gameHistorySettleds.Any())
             {
                 foreach (var gameHistorySettled in gameHistorySettleds)
                 {
-                    reply.Items.Add(new GameHistorySettled()
+                    reply.Items.Add(new GameSettledHistory()
                     {
                         PlayerCode = gameHistorySettled.PlayerCode,
                         ExternalRoundId = gameHistorySettled.ExternalRoundId,
@@ -214,6 +217,42 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
                         PlayerWinLoss = gameHistorySettled.PlayerWinLoss,
                         Turnover = gameHistorySettled.Turnover,
                         Settle = gameHistorySettled.Settle,
+                        AdditionalData = gameHistorySettled.AdditionalData
+                    });
+                }
+            }
+
+            return reply;
+        }
+
+        public override async Task<GameUnsettleHistoryReply> GameUnsettleHistory(GameUnsettleHistoryRequest request, ServerCallContext context)
+        {
+            var query = new GameUnsettleHistoryQuery(
+                ApiUrl: new(request.ApiUrl),
+                MerchantId: request.MerchantId,
+                MerchantKey: request.MerchantKey,
+                StartDate: request.StartDate.ToDateTime(),
+                EndDate: request.EndDate.ToDateTime());
+
+            var gameHistorySettleds = await _gameUnsettleHistorySerivce
+                    .QueryAsync(
+                        query: query,
+                        cancellationToken: context.CancellationToken)
+                    .ToArrayAsync(context.CancellationToken)
+                    .ConfigureAwait(false);
+            var reply = new GameUnsettleHistoryReply();
+
+            if (gameHistorySettleds.Any())
+            {
+                foreach (var gameHistorySettled in gameHistorySettleds)
+                {
+                    reply.Items.Add(new GameUnsettleHistory()
+                    {
+                        PlayerCode = gameHistorySettled.PlayerCode,
+                        ExternalRoundId = gameHistorySettled.ExternalRoundId,
+                        ExternalCreatedOn = gameHistorySettled.ExternalCreatedOn.ToTimestamp(),
+                        Bet = gameHistorySettled.Bet,
+                        ValidBet = gameHistorySettled.ValidBet,
                         AdditionalData = gameHistorySettled.AdditionalData
                     });
                 }
