@@ -291,7 +291,7 @@ internal class GameApiClient : IGameApiClient
             var errorMessage = jsonNode["result"]!.ToString();
 
             _logger.LogError("getUserBalance failed, errorCode:{errorCode}, errorMessage:{errorMessage}", errorCode, errorMessage);
-            return new GetUserBalanceResult(false, 0);
+            return new GetUserBalanceResult(false, 0M);
         }
 
         var data = jsonNode["data"];
@@ -299,7 +299,7 @@ internal class GameApiClient : IGameApiClient
         if (data is null)
             return new GetUserBalanceResult(false, 0);
 
-        var balance = data["balance"]!.GetValue<int>();
+        var balance = data["balance"]!.GetValue<decimal>();
 
         return new GetUserBalanceResult(true, balance);
     }

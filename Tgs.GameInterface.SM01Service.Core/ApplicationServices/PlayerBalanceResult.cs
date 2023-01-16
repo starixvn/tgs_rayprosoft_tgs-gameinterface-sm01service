@@ -2,4 +2,4 @@
 
 public record PlayerBalanceResult(
     bool IsPlayerExist,
-    int? Balance);
+    decimal? Balance);

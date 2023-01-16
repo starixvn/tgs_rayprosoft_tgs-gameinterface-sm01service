@@ -2,4 +2,4 @@
 
 public record PlayerBalanceResultViewModel(
     bool IsPlayerExist,
-    int? Balance);
+    decimal? Balance);
