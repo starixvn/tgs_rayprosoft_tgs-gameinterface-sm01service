@@ -95,6 +95,90 @@ public class GetSettledTransactionsHistoryUnitTests
     }
 
     [TestMethod]
+    public async Task 獲取交易歷史紀錄_取消比賽()
+    {
+        var apiUrl = new Uri("https://cn.ucfclive.com");
+        var merchantId = "SQjCxm2cX5bahBta";
+        var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";
+
+        var startDate = new DateTime(2023, 01, 11, 16, 20, 00);
+        var endDate = new DateTime(2023, 01, 11, 16, 50, 00);
+
+        var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
+        var response = """
+                        {
+                "process": "success",
+                "result": "",
+                "data": {
+                    "list": [
+                        {
+                            "bet_id": "8854230",
+                            "game_number": "4",
+                            "bet_side": "draw",
+                            "win_or_lost": 800,
+                            "create_at": "2023-01-16 17:42:54",
+                            "update_at": "2023-01-16 17:48:04",
+                            "winner": "draw",
+                            "bet_amount": 100,
+                            "odds": "800.00",
+                            "customerName": "4uglyyqu4nae"
+                        },
+                        {
+                            "bet_id": "8854229",
+                            "game_number": "4",
+                            "bet_side": "draw",
+                            "win_or_lost": 800,
+                            "create_at": "2023-01-16 17:40:52",
+                            "update_at": "2023-01-16 17:48:04",
+                            "winner": "draw",
+                            "bet_amount": 100,
+                            "odds": "800.00",
+                            "customerName": "4uglyyqu4nae"
+                        },
+                        {
+                            "bet_id": "8854228",
+                            "game_number": "3",
+                            "bet_side": "draw",
+                            "win_or_lost": 0,
+                            "create_at": "2023-01-16 17:33:17",
+                            "update_at": "2023-01-16 17:35:54",
+                            "winner": false,
+                            "bet_amount": 500,
+                            "odds": "",
+                            "customerName": "4uglyyqu4nae"
+                        }
+                    ]
+                }
+            }
+            """;
+
+        var handler = new MockHttpMessageHandler();
+
+        _ = handler
+            .Expect(HttpMethod.Post, url.ToString())
+            .Respond(HttpStatusCode.OK, new StringContent(response));
+
+        var fakeHttpClient = handler.ToHttpClient();
+
+        var fakeLog = NullLogger<GameApiClient>.Instance;
+        var sut = new GameApiClient(fakeHttpClient, fakeLog);
+
+        var actual = await sut
+            .GetSettledTransationsHistoryAsync(
+                apiUrl: apiUrl,
+                merchantId: merchantId,
+                merchantKey: merchantKey,
+                startDate: startDate,
+                endDate: endDate)
+            .ToArrayAsync()
+            .ConfigureAwait(false);
+
+        Assert.IsNotNull(actual);
+        Assert.AreEqual(3, actual.Length);
+        Assert.AreEqual(true, actual[2].IsCancelled);        
+    }
+
+    [TestMethod]
     public async Task 開始時間與結束時間不能超過30分鐘()
     {
         var apiUrl = new Uri("https://cn.ucfclive.com");

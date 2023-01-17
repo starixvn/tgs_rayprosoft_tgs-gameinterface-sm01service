@@ -2,7 +2,7 @@
 
 public record GameSettledHistoryResult(
     string PlayerCode,
-    string ExternalRoundId,    
+    string ExternalRoundId,
     DateTimeOffset ExternalCreatedOn,
     DateTimeOffset ExternalClosedOn,
     decimal Bet,
@@ -10,4 +10,5 @@ public record GameSettledHistoryResult(
     decimal PlayerWinLoss,
     decimal Turnover,
     decimal Settle,
-    string AdditionalData);
+    string AdditionalData,
+    bool IsCancelled);

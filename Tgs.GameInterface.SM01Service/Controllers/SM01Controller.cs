@@ -325,7 +325,8 @@ public class SM01Controller : ControllerBase
                 PlayerWinLoss: gameRecord.PlayerWinLoss,
                 Turnover: gameRecord.Turnover,
                 Settle: gameRecord.Settle,
-                AdditionalData: gameRecord.AdditionalData);
+                AdditionalData: gameRecord.AdditionalData,
+                IsCancelled: gameRecord.IsCancelled);
         }
     }
 
