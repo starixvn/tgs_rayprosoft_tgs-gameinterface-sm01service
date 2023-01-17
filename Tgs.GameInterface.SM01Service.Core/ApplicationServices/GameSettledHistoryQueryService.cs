@@ -33,15 +33,18 @@ internal class GameSettledHistoryQueryService : IQueryService<GameSettledHistory
 
         foreach (var bettingHistoryBet in bettingHistoryBets)
         {
+            var validBet = bettingHistoryBet.IsCancelled ? 0M : bettingHistoryBet.Bet;
+            var turnover = bettingHistoryBet.IsCancelled ? 0M : bettingHistoryBet.Bet;
+
             yield return new GameSettledHistoryResult(
                 PlayerCode: bettingHistoryBet.PlayerCode,
                 ExternalRoundId: bettingHistoryBet.ExternalRoundId,
                 ExternalCreatedOn: bettingHistoryBet.ExternalCreatedOn,
                 ExternalClosedOn: bettingHistoryBet.ExternalClosedOn,
                 Bet: bettingHistoryBet.Bet,
-                ValidBet: bettingHistoryBet.Bet,
+                ValidBet: validBet,
                 PlayerWinLoss: decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),
-                Turnover: bettingHistoryBet.Bet,
+                Turnover: turnover,
                 Settle: bettingHistoryBet.Bet + decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),
                 AdditionalData: bettingHistoryBet.AdditionalData,
                 IsCancelled: bettingHistoryBet.IsCancelled);
