@@ -217,7 +217,8 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
                         PlayerWinLoss = gameHistorySettled.PlayerWinLoss,
                         Turnover = gameHistorySettled.Turnover,
                         Settle = gameHistorySettled.Settle,
-                        AdditionalData = gameHistorySettled.AdditionalData
+                        AdditionalData = gameHistorySettled.AdditionalData,
+                        IsCancelled = gameHistorySettled.IsCancelled,
                     });
                 }
             }

@@ -43,7 +43,8 @@ internal class GameSettledHistoryQueryService : IQueryService<GameSettledHistory
                 PlayerWinLoss: decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),
                 Turnover: bettingHistoryBet.Bet,
                 Settle: bettingHistoryBet.Bet + decimal.Parse(bettingHistoryBet.WinOrLost.ToString()),
-                AdditionalData: bettingHistoryBet.AdditionalData);
+                AdditionalData: bettingHistoryBet.AdditionalData,
+                IsCancelled: bettingHistoryBet.IsCancelled);
         }
     }
 }

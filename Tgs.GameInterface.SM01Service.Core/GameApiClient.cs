@@ -113,6 +113,7 @@ internal class GameApiClient : IGameApiClient
                 WinOrLost = x!["win_or_lost"]!.GetValue<int>(),
                 Bet = x!["bet_amount"]!.GetValue<decimal>(),
                 AdditionalData = x.ToString(),
+                IsCancelled = x["winner"]!.ToString() == "false",
             });
         }
 

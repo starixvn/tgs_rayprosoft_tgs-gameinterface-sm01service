@@ -10,4 +10,5 @@ public record GameSettledHistoryResultViewModel(
     decimal PlayerWinLoss,
     decimal Turnover,
     decimal Settle,
-    string AdditionalData);
+    string AdditionalData,
+    bool IsCancelled);

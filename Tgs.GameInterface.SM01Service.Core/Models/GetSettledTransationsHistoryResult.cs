@@ -8,6 +8,6 @@ public record GetSettledTransationsHistoryResult
     public DateTimeOffset ExternalClosedOn { get; init; }
     public decimal Bet { get; init; }
     public string PlayerCode { get; init; } = default!;
-
-    public string AdditionalData { get; init; } = default!;
+    public string AdditionalData { get; init; } = default!;   
+    public bool IsCancelled { get; init; }
 }
