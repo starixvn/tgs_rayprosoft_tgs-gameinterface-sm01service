@@ -13,7 +13,7 @@ public class GetSettledTransactionsHistoryUnitTests
     {
         var apiUrl = new Uri("https://cn.ucfclive.com");
         var merchantId = "SQjCxm2cX5bahBta";
-        var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";        
+        var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";
 
         var startDate = new DateTime(2023, 01, 11, 16, 20, 00);
         var endDate = new DateTime(2023, 01, 11, 16, 50, 00);
@@ -88,7 +88,7 @@ public class GetSettledTransactionsHistoryUnitTests
             .ConfigureAwait(false);
 
         Assert.IsNotNull(actual);
-        Assert.AreEqual(3,actual.Length);
+        Assert.AreEqual(3, actual.Length);
         Assert.AreEqual("4ue4l6qtysn3", actual[0].PlayerCode);
         Assert.AreEqual("8854209", actual[0].ExternalRoundId);
         Assert.AreEqual(160M, actual[0].Bet);
@@ -175,7 +175,7 @@ public class GetSettledTransactionsHistoryUnitTests
 
         Assert.IsNotNull(actual);
         Assert.AreEqual(3, actual.Length);
-        Assert.AreEqual(true, actual[2].IsCancelled);        
+        Assert.AreEqual(true, actual[2].IsCancelled);
     }
 
     [TestMethod]
@@ -213,5 +213,5 @@ public class GetSettledTransactionsHistoryUnitTests
             .ToArrayAsync()
             .AsTask())
         .ConfigureAwait(false);
-    }    
+    }
 }
