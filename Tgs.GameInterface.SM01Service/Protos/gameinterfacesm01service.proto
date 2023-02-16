@@ -104,10 +104,11 @@ message FundHistory{
 }
 
 message PlatformLoginReply {
-	string merchant_id = 1;
-	string customer_name = 2;
-	int64 timestamp = 3;
-	string sign = 4;
+	string api_url = 1;
+	string merchant_id = 2;
+	string customer_name = 3;
+	int64 timestamp = 4;
+	string sign = 5;
 }
 
 message GameSettledHistoryReply {
