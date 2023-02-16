@@ -319,7 +319,7 @@ internal class GameApiClient : IGameApiClient
 
         _logger.LogInformation("SM01 PlatformLoginAsync, parameters:{parameters}", JsonSerializer.Serialize(parameters));
 
-        return ValueTask.FromResult(new PlatformLoginResult(merchantId, customerName, long.Parse(parameters["timestamp"]), parameters["sign"]));
+        return ValueTask.FromResult(new PlatformLoginResult(apiUrl.ToString(), merchantId, customerName, long.Parse(parameters["timestamp"]), parameters["sign"]));
     }
 
     public async ValueTask<TransferInResult> TransferInAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, int amount, string merchantTransactionId, CancellationToken cancellationToken = default)
