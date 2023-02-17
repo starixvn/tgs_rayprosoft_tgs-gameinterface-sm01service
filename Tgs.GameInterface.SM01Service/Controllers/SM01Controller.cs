@@ -263,6 +263,7 @@ public class SM01Controller : ControllerBase
         var result = await service.GetAsync(query);
 
         return new PlatformLoginResultViewModel(
+            result.ApiUrl,
             result.MerchantId,
             result.CustomerName,
             result.Timestamp,

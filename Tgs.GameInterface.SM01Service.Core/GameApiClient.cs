@@ -363,7 +363,7 @@ internal class GameApiClient : IGameApiClient
             return new TransferInResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), 0);
         }
 
-        var balance = data["balance"]!.GetValue<int>();
+        var balance = data["balance"]!.GetValue<decimal>();
 
         return new TransferInResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), balance);
     }
@@ -408,7 +408,7 @@ internal class GameApiClient : IGameApiClient
             return new TransferOutResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), 0);
         }
 
-        var balance = data["balance"]!.GetValue<int>();
+        var balance = data["balance"]!.GetValue<decimal>();
 
         return new TransferOutResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), balance);
     }
