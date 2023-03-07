@@ -110,7 +110,7 @@ internal class GameApiClient : IGameApiClient
                 ExternalRoundId = x!["bet_id"]!.ToString(),
                 ExternalCreatedOn = new DateTimeOffset(DateTime.ParseExact(x!["create_at"]!.ToString(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D)),
                 ExternalClosedOn = new DateTimeOffset(DateTime.ParseExact(x!["update_at"]!.ToString(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D)),
-                WinOrLost = x!["win_or_lost"]!.GetValue<int>(),
+                WinOrLost = x!["win_or_lost"]!.GetValue<decimal>(),
                 Bet = x!["bet_amount"]!.GetValue<decimal>(),
                 AdditionalData = x.ToString(),
                 IsCancelled = x["winner"]!.ToString() == "false",
