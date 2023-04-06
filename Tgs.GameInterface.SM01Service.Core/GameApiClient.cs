@@ -110,7 +110,7 @@ internal class GameApiClient : IGameApiClient
                 ExternalRoundId = x!["bet_id"]!.ToString(),
                 ExternalCreatedOn = new DateTimeOffset(DateTime.ParseExact(x!["create_at"]!.ToString(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D)),
                 ExternalClosedOn = new DateTimeOffset(DateTime.ParseExact(x!["update_at"]!.ToString(), "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture), TimeSpan.FromHours(8D)),
-                WinOrLost = x!["win_or_lost"]!.GetValue<int>(),
+                WinOrLost = x!["win_or_lost"]!.GetValue<decimal>(),
                 Bet = x!["bet_amount"]!.GetValue<decimal>(),
                 AdditionalData = x.ToString(),
                 IsCancelled = x["winner"]!.ToString() == "false",
@@ -319,7 +319,7 @@ internal class GameApiClient : IGameApiClient
 
         _logger.LogInformation("SM01 PlatformLoginAsync, parameters:{parameters}", JsonSerializer.Serialize(parameters));
 
-        return ValueTask.FromResult(new PlatformLoginResult(merchantId, customerName, long.Parse(parameters["timestamp"]), parameters["sign"]));
+        return ValueTask.FromResult(new PlatformLoginResult(apiUrl.ToString(), merchantId, customerName, long.Parse(parameters["timestamp"]), parameters["sign"]));
     }
 
     public async ValueTask<TransferInResult> TransferInAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, int amount, string merchantTransactionId, CancellationToken cancellationToken = default)
@@ -363,7 +363,7 @@ internal class GameApiClient : IGameApiClient
             return new TransferInResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), 0);
         }
 
-        var balance = data["balance"]!.GetValue<int>();
+        var balance = data["balance"]!.GetValue<decimal>();
 
         return new TransferInResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), balance);
     }
@@ -408,7 +408,7 @@ internal class GameApiClient : IGameApiClient
             return new TransferOutResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), 0);
         }
 
-        var balance = data["balance"]!.GetValue<int>();
+        var balance = data["balance"]!.GetValue<decimal>();
 
         return new TransferOutResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), balance);
     }

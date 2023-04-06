@@ -53,6 +53,7 @@ namespace Tgs.GameInterface.SM01Service.GrpcServices
 
             return new PlatformLoginReply()
             {
+                ApiUrl = result.ApiUrl,
                 CustomerName = result.CustomerName,
                 MerchantId = result.MerchantId,
                 Sign = result.Sign,

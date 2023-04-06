@@ -19,6 +19,6 @@ internal class PlatformLoginGetService : IGetService<PlatformLoginQuery, Platfor
                 query.MerchantKey,
                 query.CustomerName,
                 cancellationToken);
-        return new PlatformLoginResult(result.MerchantId, result.CustomerName, result.Timestamp, result.Sign);
+        return new PlatformLoginResult(result.ApiUrl, result.MerchantId, result.CustomerName, result.Timestamp, result.Sign);
     }
 }
