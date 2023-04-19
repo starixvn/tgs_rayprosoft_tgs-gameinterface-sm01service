@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Microsoft.Extensions.Logging.Abstractions;
 using RichardSzalay.MockHttp;
+using Tgs.GameInterface.SM01Service.Core.Exceptions;
 
 namespace Tgs.GameInterface.SM01Service.Core.UnitTest;
 
@@ -75,5 +76,47 @@ public class GetUnsettleTransactionsHistoryUnitTests
             .ConfigureAwait(false);
 
         Assert.IsNotNull(actual);
+    }
+
+    [TestMethod]
+    public void Sign錯誤4003()
+    {
+        var apiUrl = new Uri("https://cn.ucfclive.com");
+        var merchantId = "SQjCxm2cX5bahBta";
+        var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";
+
+        var startDate = new DateTime(2023, 01, 11, 16, 20, 00);
+        var endDate = new DateTime(2023, 01, 11, 16, 50, 00);
+
+        var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
+        var response = """
+            {
+                "process": "error",
+                "result": "Sign Error",
+                "code": "4003"                
+            }
+            """;
+
+        var handler = new MockHttpMessageHandler();
+
+        _ = handler
+            .Expect(HttpMethod.Post, url.ToString())
+            .Respond(HttpStatusCode.OK, new StringContent(response));
+
+        var fakeHttpClient = handler.ToHttpClient();
+
+        var fakeLog = NullLogger<GameApiClient>.Instance;
+        var sut = new GameApiClient(fakeHttpClient, fakeLog);
+
+        _ = Assert.ThrowsExceptionAsync<GameProviderResponseErrorException>(async ()
+            => await sut
+                .GetUnsettleTransationsHistoryAsync(
+                    apiUrl: apiUrl,
+                    merchantId: merchantId,
+                    merchantKey: merchantKey,
+                    startDate: startDate,
+                    endDate: endDate)
+                .ToArrayAsync()
+                .ConfigureAwait(false));
     }
 }

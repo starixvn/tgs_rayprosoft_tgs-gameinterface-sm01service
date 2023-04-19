@@ -154,7 +154,7 @@ internal class GameApiClient : IGameApiClient
 
         if (!process)
         {
-            var errorCode = jsonNode["code"]!.GetValue<int>();
+            var errorCode = jsonNode["code"]!.ToString();
 
             var errorMessage = jsonNode["result"]!.ToString();
 
