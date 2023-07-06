@@ -4,6 +4,10 @@ namespace Tgs.GameInterface.SM01Service.Client;
 
 public interface IGameInterfaceSM01Client
 {
+    ValueTask<string> CheckingServiceAsync(
+        string machineName,
+        CancellationToken cancellationToken = default);
+
     ValueTask<FundReply> FundInAsync(
        Uri apiUrl,
        string merchantId,

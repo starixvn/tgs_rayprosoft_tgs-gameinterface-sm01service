@@ -1,5 +1,5 @@
 ﻿namespace Tgs.GameInterface.SM01Service.ViewModels;
 
 public record FundResultViewModel(
-    string RefTransactionCode,    
+    string RefTransactionCode,
     decimal Balance);

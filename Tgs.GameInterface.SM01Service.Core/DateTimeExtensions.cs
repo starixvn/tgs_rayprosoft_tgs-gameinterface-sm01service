@@ -13,5 +13,4 @@ public static class DateTimeExtensions
         var _timeZone = TimeZoneInfo.CreateCustomTimeZone(id: "Asia/Hong_Kong", baseUtcOffset: TimeSpan.FromHours(8), "(UTC+08:00) Hong Kong Standard Time", "Hong Kong Standard Time");
         return TimeZoneInfo.ConvertTime(date.ToUniversalTime(), _timeZone).ToString("yyyy-MM-dd HH:mm:ss");
     }
-
 }

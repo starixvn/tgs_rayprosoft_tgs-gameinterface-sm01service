@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Microsoft.Extensions.Logging.Abstractions;
 using RichardSzalay.MockHttp;
-using Tgs.GameInterface.SM01Service.Core.Exceptions;
 
 namespace Tgs.GameInterface.SM01Service.Core.UnitTest;
 

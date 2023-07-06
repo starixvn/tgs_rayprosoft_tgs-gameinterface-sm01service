@@ -10,7 +10,7 @@ public interface IGameApiClient
 
     ValueTask<TransferOutResult> TransferOutAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, int amount, string merchantTransactionId, CancellationToken cancellationToken = default);
 
-    ValueTask<PlatformLoginResult> PlatformLoginAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName,CancellationToken cancellationToken = default);
+    ValueTask<PlatformLoginResult> PlatformLoginAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, CancellationToken cancellationToken = default);
 
     IAsyncEnumerable<GetTransferHistoryResult> GetTransferHistoryAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, bool isFundOut, DateTime startDate, DateTime endDate, CancellationToken cancellationToken = default);
 

@@ -113,5 +113,5 @@ public class TransferOutUnitTests
                     merchantTransactionId: refTransactionCode)
                 .AsTask())
             .ConfigureAwait(false);
-    }    
+    }
 }

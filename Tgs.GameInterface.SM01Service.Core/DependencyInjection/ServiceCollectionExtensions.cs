@@ -5,7 +5,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddSM01ServiceCore(
+    public static IServiceCollection AddGameInterfaceCore(
         this IServiceCollection services)
         => services
             .AddHttpClient<IGameApiClient, GameApiClient>()

@@ -4,263 +4,275 @@ using Tgs.GameInterface.SM01Service.Core.ApplicationServices;
 using Tgs.GameInterface.SM01Service.Protos;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameInterface.SM01Service.GrpcServices
+namespace Tgs.GameInterface.SM01Service.GrpcServices;
+
+internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInterfaceSM01ServiceBase
 {
-    internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInterfaceSM01ServiceBase
+    private readonly ILogger<GameInterfaceSM01GrpcService> _logger;
+    private readonly IGetService<FundInQuery, FundResult> _fundInService;
+    private readonly IGetService<FundOutQuery, FundResult> _fundOutService;
+    private readonly IQueryService<FundHistoryQuery, FundHistoryResult> _fundHistoryService;
+    private readonly ICommandService<PlayerCreateCommand> _playerCreateService;
+    private readonly IGetService<PlayerBalanceQuery, PlayerBalanceResult> _playerBalanceService;
+    private readonly IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> _gameSettledHistoryService;
+    private readonly IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> _gameUnsettleHistorySerivce;
+    private readonly IGetService<PlatformLoginQuery, PlatformLoginResult> _platformLoginService;
+
+    public GameInterfaceSM01GrpcService(
+        ILogger<GameInterfaceSM01GrpcService> logger,
+        IGetService<FundInQuery, FundResult> fundInService,
+        IGetService<FundOutQuery, FundResult> fundOutService,
+        IQueryService<FundHistoryQuery, FundHistoryResult> fundHistoryService,
+        ICommandService<PlayerCreateCommand> playerCreateService,
+        IGetService<PlayerBalanceQuery, PlayerBalanceResult> playerBalanceService,
+        IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> gameSettledHistorySerivce,
+        IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> gameUnsettleHistorySerivce,
+        IGetService<PlatformLoginQuery, PlatformLoginResult> platformLoginService)
     {
-        private readonly IGetService<FundInQuery, FundResult> _fundInService;
-        private readonly IGetService<FundOutQuery, FundResult> _fundOutService;
-        private readonly IQueryService<FundHistoryQuery, FundHistoryResult> _fundHistoryService;
-        private readonly ICommandService<PlayerCreateCommand> _playerCreateService;
-        private readonly IGetService<PlayerBalanceQuery, PlayerBalanceResult> _playerBalanceService;
-        private readonly IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> _gameSettledHistoryService;
-        private readonly IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> _gameUnsettleHistorySerivce;
-        private readonly IGetService<PlatformLoginQuery, PlatformLoginResult> _platformLoginService;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
+        _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
+        _fundHistoryService = fundHistoryService ?? throw new ArgumentNullException(nameof(fundHistoryService));
+        _playerCreateService = playerCreateService ?? throw new ArgumentNullException(nameof(playerCreateService));
+        _playerBalanceService = playerBalanceService ?? throw new ArgumentNullException(nameof(playerBalanceService));
+        _gameSettledHistoryService = gameSettledHistorySerivce ?? throw new ArgumentNullException(nameof(gameSettledHistorySerivce));
+        _gameUnsettleHistorySerivce = gameUnsettleHistorySerivce ?? throw new ArgumentNullException(nameof(gameUnsettleHistorySerivce));
+        _platformLoginService = platformLoginService ?? throw new ArgumentNullException(nameof(platformLoginService));
+    }
 
-        public GameInterfaceSM01GrpcService(
-            IGetService<FundInQuery, FundResult> fundInService,
-            IGetService<FundOutQuery, FundResult> fundOutService,
-            IQueryService<FundHistoryQuery, FundHistoryResult> fundHistoryService,
-            ICommandService<PlayerCreateCommand> playerCreateService,
-            IGetService<PlayerBalanceQuery, PlayerBalanceResult> playerBalanceService,
-            IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> gameSettledHistorySerivce,
-            IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> gameUnsettleHistorySerivce,
-            IGetService<PlatformLoginQuery, PlatformLoginResult> platformLoginService)
+    public override Task<CheckingServiceReply> CheckingService(CheckingServiceRequest request, ServerCallContext context)
+    {
+        _logger.LogWarning("LogOn:{logOn} Message: Create a check connection.({machineName})", DateTime.Now.ToString("o"), request.MachineName);
+
+        return Task.FromResult(new CheckingServiceReply
         {
-            _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
-            _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
-            _fundHistoryService = fundHistoryService ?? throw new ArgumentNullException(nameof(fundHistoryService));
-            _playerCreateService = playerCreateService ?? throw new ArgumentNullException(nameof(playerCreateService));
-            _playerBalanceService = playerBalanceService ?? throw new ArgumentNullException(nameof(playerBalanceService));
-            _gameSettledHistoryService = gameSettledHistorySerivce ?? throw new ArgumentNullException(nameof(gameSettledHistorySerivce));
-            _gameUnsettleHistorySerivce = gameUnsettleHistorySerivce ?? throw new ArgumentNullException(nameof(gameUnsettleHistorySerivce));
-            _platformLoginService = platformLoginService ?? throw new ArgumentNullException(nameof(platformLoginService));
-        }
+            MachineName = Environment.MachineName
+        });
+    }
 
-        public override async Task<PlatformLoginReply> PlatformLogin(PlatformLoginRequest request, ServerCallContext context)
+    public override async Task<PlatformLoginReply> PlatformLogin(PlatformLoginRequest request, ServerCallContext context)
+    {
+        var query = new PlatformLoginQuery(
+            ApiUrl: new Uri(request.ApiUrl),
+            MerchantId: request.MerchantId,
+            MerchantKey: request.MerchantKey,
+            CustomerName: request.CustomerName);
+
+        var result = await _platformLoginService
+            .GetAsync(
+                query: query,
+                cancellationToken: context.CancellationToken)
+            .ConfigureAwait(false);
+
+        return new PlatformLoginReply()
         {
-            var query = new PlatformLoginQuery(
-                ApiUrl: new Uri(request.ApiUrl),
-                MerchantId: request.MerchantId,
-                MerchantKey: request.MerchantKey,
-                CustomerName: request.CustomerName);
+            ApiUrl = result.ApiUrl,
+            CustomerName = result.CustomerName,
+            MerchantId = result.MerchantId,
+            Sign = result.Sign,
+            Timestamp = result.Timestamp
+        };
+    }
 
-            var result = await _platformLoginService
+    public override async Task<FundReply> FundIn(FundRequest request, ServerCallContext context)
+    {
+        var query = new FundInQuery(
+           ApiUrl: new(request.ApiUrl),
+           MerchantId: request.MerchantId,
+           MerchantKey: request.MerchantKey,
+           CustomerName: request.CustomerName,
+           RefTransactionCode: request.RefTransactionCode,
+           Amount: request.Amount);
+
+        var result = await _fundInService
                 .GetAsync(
                     query: query,
                     cancellationToken: context.CancellationToken)
                 .ConfigureAwait(false);
 
-            return new PlatformLoginReply()
+        return new FundReply()
+        {
+            RefTransactionCode = result.RefTransactionCode,
+            TransactionId = result.RefTransactionCode,
+            Balance = result.Balance
+        };
+    }
+
+    public override async Task<FundReply> FundOut(FundRequest request, ServerCallContext context)
+    {
+        var query = new FundOutQuery(
+            ApiUrl: new(request.ApiUrl),
+            MerchantId: request.MerchantId,
+            MerchantKey: request.MerchantKey,
+            CustomerName: request.CustomerName,
+            RefTransactionCode: request.RefTransactionCode,
+            Amount: request.Amount);
+
+        var result = await _fundOutService
+                .GetAsync(
+                    query: query,
+                    cancellationToken: context.CancellationToken)
+                .ConfigureAwait(false);
+
+        return new FundReply()
+        {
+            RefTransactionCode = result.RefTransactionCode,
+            TransactionId = result.RefTransactionCode,
+            Balance = result.Balance
+        };
+    }
+
+    public override async Task<FundHistoryReply> FundHistory(FundHistoryRequest request, ServerCallContext context)
+    {
+        var query = new FundHistoryQuery(
+            ApiUrl: new(request.ApiUrl),
+            MerchantId: request.MerchantId,
+            MerchantKey: request.MerchantKey,
+            CustomerName: request.CustomerName,
+            IsFundOut: request.IsFundOut,
+            StartDate: request.StartDate.ToDateTime(),
+            EndDate: request.EndDate.ToDateTime());
+
+        var fundHistorys = await _fundHistoryService
+            .QueryAsync(
+                query: query,
+                cancellationToken: context.CancellationToken)
+            .ToArrayAsync(context.CancellationToken)
+            .ConfigureAwait(false);
+
+        var reply = new FundHistoryReply();
+        if (fundHistorys.Any())
+        {
+            foreach (var fundHistory in fundHistorys)
             {
-                ApiUrl = result.ApiUrl,
-                CustomerName = result.CustomerName,
-                MerchantId = result.MerchantId,
-                Sign = result.Sign,
-                Timestamp = result.Timestamp
-            };
+                reply.Items.Add(new FundHistory()
+                {
+                    PlayerCode = fundHistory.CustomerName,
+                    Amount = fundHistory.Amount,
+                    CreatedTime = fundHistory.CreatedTime.ToTimestamp(),
+                    TransactionId = fundHistory.TransactionId
+                });
+            }
         }
 
-        public override async Task<FundReply> FundIn(FundRequest request, ServerCallContext context)
+        return reply;
+    }
+
+    public override async Task<BaseReply> PlayerCreate(PlayerCreateRequest request, ServerCallContext context)
+    {
+        var command = new PlayerCreateCommand(
+        ApiUrl: new(request.ApiUrl),
+        MerchantId: request.MerchantId,
+        MerchantKey: request.MerchantKey,
+        CustomerName: request.CustomerName);
+
+        await _playerCreateService
+                .ExecuteAsync(
+                    command: command,
+                    cancellationToken: context.CancellationToken)
+                .ConfigureAwait(false);
+
+        return new BaseReply()
         {
-            var query = new FundInQuery(
-               ApiUrl: new(request.ApiUrl),
-               MerchantId: request.MerchantId,
-               MerchantKey: request.MerchantKey,
-               CustomerName: request.CustomerName,
-               RefTransactionCode: request.RefTransactionCode,
-               Amount: request.Amount);
+            Status = true
+        };
+    }
 
-            var result = await _fundInService
-                    .GetAsync(
-                        query: query,
-                        cancellationToken: context.CancellationToken)
-                    .ConfigureAwait(false);
+    public override async Task<PlayerBalanceReply> PlayerBalance(PlayerBalanceRequest request, ServerCallContext context)
+    {
+        var query = new PlayerBalanceQuery(
+        ApiUrl: new(request.ApiUrl),
+        MerchantId: request.MerchantId,
+        MerchantKey: request.MerchantKey,
+        CustomerName: request.CustomerName);
 
-            return new FundReply()
-            {
-                RefTransactionCode = result.RefTransactionCode,
-                TransactionId = result.RefTransactionCode,
-                Balance = result.Balance
-            };
-        }
+        var result = await _playerBalanceService
+                .GetAsync(
+                    query: query,
+                    cancellationToken: context.CancellationToken)
+                .ConfigureAwait(false);
 
-        public override async Task<FundReply> FundOut(FundRequest request, ServerCallContext context)
+        return new PlayerBalanceReply()
         {
-            var query = new FundOutQuery(
-                ApiUrl: new(request.ApiUrl),
-                MerchantId: request.MerchantId,
-                MerchantKey: request.MerchantKey,
-                CustomerName: request.CustomerName,
-                RefTransactionCode: request.RefTransactionCode,
-                Amount: request.Amount);
+            IsPlayerExist = result.IsPlayerExist,
+            Balance = result.Balance.GetValueOrDefault(),
+        };
+    }
 
-            var result = await _fundOutService
-                    .GetAsync(
-                        query: query,
-                        cancellationToken: context.CancellationToken)
-                    .ConfigureAwait(false);
+    public override async Task<GameSettledHistoryReply> GameSettledHistory(GameSettledHistoryRequest request, ServerCallContext context)
+    {
+        var query = new GameSettledHistoryQuery(
+            ApiUrl: new(request.ApiUrl),
+            MerchantId: request.MerchantId,
+            MerchantKey: request.MerchantKey,
+            StartDate: request.StartDate.ToDateTime(),
+            EndDate: request.EndDate.ToDateTime());
 
-            return new FundReply()
-            {
-                RefTransactionCode = result.RefTransactionCode,
-                TransactionId = result.RefTransactionCode,
-                Balance = result.Balance
-            };
-        }
-
-        public override async Task<FundHistoryReply> FundHistory(FundHistoryRequest request, ServerCallContext context)
-        {
-            var query = new FundHistoryQuery(
-                ApiUrl: new(request.ApiUrl),
-                MerchantId: request.MerchantId,
-                MerchantKey: request.MerchantKey,
-                CustomerName: request.CustomerName,
-                IsFundOut: request.IsFundOut,
-                StartDate: request.StartDate.ToDateTime(),
-                EndDate: request.EndDate.ToDateTime());
-
-            var fundHistorys = await _fundHistoryService
+        var gameHistorySettleds = await _gameSettledHistoryService
                 .QueryAsync(
                     query: query,
                     cancellationToken: context.CancellationToken)
                 .ToArrayAsync(context.CancellationToken)
                 .ConfigureAwait(false);
+        var reply = new GameSettledHistoryReply();
 
-            var reply = new FundHistoryReply();
-            if (fundHistorys.Any())
+        if (gameHistorySettleds.Any())
+        {
+            foreach (var gameHistorySettled in gameHistorySettleds)
             {
-                foreach (var fundHistory in fundHistorys)
+                reply.Items.Add(new GameSettledHistory()
                 {
-                    reply.Items.Add(new FundHistory()
-                    {
-                        PlayerCode = fundHistory.CustomerName,
-                        Amount = fundHistory.Amount,
-                        CreatedTime = fundHistory.CreatedTime.ToTimestamp(),
-                        TransactionId = fundHistory.TransactionId
-                    });
-                }
+                    PlayerCode = gameHistorySettled.PlayerCode,
+                    ExternalRoundId = gameHistorySettled.ExternalRoundId,
+                    ExternalCreatedOn = gameHistorySettled.ExternalCreatedOn.ToTimestamp(),
+                    ExternalClosedOn = gameHistorySettled.ExternalClosedOn.ToTimestamp(),
+                    Bet = gameHistorySettled.Bet,
+                    ValidBet = gameHistorySettled.ValidBet,
+                    PlayerWinLoss = gameHistorySettled.PlayerWinLoss,
+                    Turnover = gameHistorySettled.Turnover,
+                    Settle = gameHistorySettled.Settle,
+                    AdditionalData = gameHistorySettled.AdditionalData,
+                    IsCancelled = gameHistorySettled.IsCancelled,
+                });
             }
-
-            return reply;
         }
 
-        public override async Task<BaseReply> PlayerCreate(PlayerCreateRequest request, ServerCallContext context)
-        {
-            var command = new PlayerCreateCommand(
+        return reply;
+    }
+
+    public override async Task<GameUnsettleHistoryReply> GameUnsettleHistory(GameUnsettleHistoryRequest request, ServerCallContext context)
+    {
+        var query = new GameUnsettleHistoryQuery(
             ApiUrl: new(request.ApiUrl),
             MerchantId: request.MerchantId,
             MerchantKey: request.MerchantKey,
-            CustomerName: request.CustomerName);
+            StartDate: request.StartDate.ToDateTime(),
+            EndDate: request.EndDate.ToDateTime());
 
-            await _playerCreateService
-                    .ExecuteAsync(
-                        command: command,
-                        cancellationToken: context.CancellationToken)
-                    .ConfigureAwait(false);
+        var gameHistorySettleds = await _gameUnsettleHistorySerivce
+                .QueryAsync(
+                    query: query,
+                    cancellationToken: context.CancellationToken)
+                .ToArrayAsync(context.CancellationToken)
+                .ConfigureAwait(false);
+        var reply = new GameUnsettleHistoryReply();
 
-            return new BaseReply()
-            {
-                Status = true
-            };
-        }
-
-        public override async Task<PlayerBalanceReply> PlayerBalance(PlayerBalanceRequest request, ServerCallContext context)
+        if (gameHistorySettleds.Any())
         {
-            var query = new PlayerBalanceQuery(
-            ApiUrl: new(request.ApiUrl),
-            MerchantId: request.MerchantId,
-            MerchantKey: request.MerchantKey,
-            CustomerName: request.CustomerName);
-
-            var result = await _playerBalanceService
-                    .GetAsync(
-                        query: query,
-                        cancellationToken: context.CancellationToken)
-                    .ConfigureAwait(false);
-
-            return new PlayerBalanceReply()
+            foreach (var gameHistorySettled in gameHistorySettleds)
             {
-                IsPlayerExist = result.IsPlayerExist,
-                Balance = result.Balance.GetValueOrDefault(),
-            };
-        }
-
-        public override async Task<GameSettledHistoryReply> GameSettledHistory(GameSettledHistoryRequest request, ServerCallContext context)
-        {
-            var query = new GameSettledHistoryQuery(
-                ApiUrl: new(request.ApiUrl),
-                MerchantId: request.MerchantId,
-                MerchantKey: request.MerchantKey,
-                StartDate: request.StartDate.ToDateTime(),
-                EndDate: request.EndDate.ToDateTime());
-
-            var gameHistorySettleds = await _gameSettledHistoryService
-                    .QueryAsync(
-                        query: query,
-                        cancellationToken: context.CancellationToken)
-                    .ToArrayAsync(context.CancellationToken)
-                    .ConfigureAwait(false);
-            var reply = new GameSettledHistoryReply();
-
-            if (gameHistorySettleds.Any())
-            {
-                foreach (var gameHistorySettled in gameHistorySettleds)
+                reply.Items.Add(new GameUnsettleHistory()
                 {
-                    reply.Items.Add(new GameSettledHistory()
-                    {
-                        PlayerCode = gameHistorySettled.PlayerCode,
-                        ExternalRoundId = gameHistorySettled.ExternalRoundId,
-                        ExternalCreatedOn = gameHistorySettled.ExternalCreatedOn.ToTimestamp(),
-                        ExternalClosedOn = gameHistorySettled.ExternalClosedOn.ToTimestamp(),
-                        Bet = gameHistorySettled.Bet,
-                        ValidBet = gameHistorySettled.ValidBet,
-                        PlayerWinLoss = gameHistorySettled.PlayerWinLoss,
-                        Turnover = gameHistorySettled.Turnover,
-                        Settle = gameHistorySettled.Settle,
-                        AdditionalData = gameHistorySettled.AdditionalData,
-                        IsCancelled = gameHistorySettled.IsCancelled,
-                    });
-                }
+                    PlayerCode = gameHistorySettled.PlayerCode,
+                    ExternalRoundId = gameHistorySettled.ExternalRoundId,
+                    ExternalCreatedOn = gameHistorySettled.ExternalCreatedOn.ToTimestamp(),
+                    Bet = gameHistorySettled.Bet,
+                    ValidBet = gameHistorySettled.ValidBet,
+                    AdditionalData = gameHistorySettled.AdditionalData
+                });
             }
-
-            return reply;
         }
 
-        public override async Task<GameUnsettleHistoryReply> GameUnsettleHistory(GameUnsettleHistoryRequest request, ServerCallContext context)
-        {
-            var query = new GameUnsettleHistoryQuery(
-                ApiUrl: new(request.ApiUrl),
-                MerchantId: request.MerchantId,
-                MerchantKey: request.MerchantKey,
-                StartDate: request.StartDate.ToDateTime(),
-                EndDate: request.EndDate.ToDateTime());
-
-            var gameHistorySettleds = await _gameUnsettleHistorySerivce
-                    .QueryAsync(
-                        query: query,
-                        cancellationToken: context.CancellationToken)
-                    .ToArrayAsync(context.CancellationToken)
-                    .ConfigureAwait(false);
-            var reply = new GameUnsettleHistoryReply();
-
-            if (gameHistorySettleds.Any())
-            {
-                foreach (var gameHistorySettled in gameHistorySettleds)
-                {
-                    reply.Items.Add(new GameUnsettleHistory()
-                    {
-                        PlayerCode = gameHistorySettled.PlayerCode,
-                        ExternalRoundId = gameHistorySettled.ExternalRoundId,
-                        ExternalCreatedOn = gameHistorySettled.ExternalCreatedOn.ToTimestamp(),
-                        Bet = gameHistorySettled.Bet,
-                        ValidBet = gameHistorySettled.ValidBet,
-                        AdditionalData = gameHistorySettled.AdditionalData
-                    });
-                }
-            }
-
-            return reply;
-        }
+        return reply;
     }
 }

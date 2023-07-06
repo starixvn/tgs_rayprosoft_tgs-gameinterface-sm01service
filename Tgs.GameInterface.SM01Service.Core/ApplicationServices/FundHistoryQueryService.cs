@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Runtime.CompilerServices;
 using Tgs.ServiceUtility;
 
 namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices
@@ -39,7 +33,7 @@ namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices
             }
 
             foreach (var fundHistory in fundHistorys)
-            {                
+            {
                 yield return new FundHistoryResult(
                     TransactionId: fundHistory.TransactionId,
                     Amount: fundHistory.Amount,

@@ -13,6 +13,20 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
         _client = client ?? throw new ArgumentNullException(nameof(client));
     }
 
+    public async ValueTask<string> CheckingServiceAsync(string machineName, CancellationToken cancellationToken = default)
+    {
+        var reply = await _client
+            .CheckingServiceAsync(
+                request: new CheckingServiceRequest
+                {
+                    MachineName = machineName
+                },
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        return reply.MachineName;
+    }
+
     public async ValueTask<FundReply> FundInAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, string refTransactionCode, int amount, CancellationToken cancellationToken = default)
     {
         var request = new FundRequest()
