@@ -93,7 +93,7 @@ public class GetUnsettleTransactionsHistoryUnitTests
             {
                 "process": "error",
                 "result": "Sign Error",
-                "code": "4003"                
+                "code": "4003"
             }
             """;
 
