@@ -3,19 +3,12 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices;
 
-internal class GameSettledHistoryQueryService : IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult>
+internal class GameSettledHistoryQueryService(
+    IGameApiClient client) : IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult>
 {
-    private readonly IGameApiClient _client;
-
-    public GameSettledHistoryQueryService(
-        IGameApiClient client)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
-
     public async IAsyncEnumerable<GameSettledHistoryResult> QueryAsync(GameSettledHistoryQuery query, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var bettingHistoryBets = await _client
+        var bettingHistoryBets = await client
                 .GetSettledTransationsHistoryAsync(
                     apiUrl: query.ApiUrl,
                     merchantId: query.MerchantId,
@@ -26,7 +19,7 @@ internal class GameSettledHistoryQueryService : IQueryService<GameSettledHistory
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-        if (!bettingHistoryBets.Any())
+        if (bettingHistoryBets.Length == 0)
         {
             yield break;
         }

@@ -2,18 +2,12 @@
 
 namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices;
 
-internal class FundInGetService : IGetService<FundInQuery, FundResult>
+internal class FundInGetService(
+    IGameApiClient client) : IGetService<FundInQuery, FundResult>
 {
-    private readonly IGameApiClient _client;
-
-    public FundInGetService(IGameApiClient client)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
-
     public async ValueTask<FundResult> GetAsync(FundInQuery query, CancellationToken cancellationToken = default)
     {
-        var result = await _client.TransferOutAsync(
+        var result = await client.TransferOutAsync(
             apiUrl: query.ApiUrl,
             merchantId: query.MerchantId,
             merchantKey: query.MerchantKey,

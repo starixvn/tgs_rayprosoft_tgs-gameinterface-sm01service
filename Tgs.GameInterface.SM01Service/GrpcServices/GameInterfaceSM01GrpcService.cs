@@ -6,43 +6,20 @@ using Tgs.ServiceUtility;
 
 namespace Tgs.GameInterface.SM01Service.GrpcServices;
 
-internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInterfaceSM01ServiceBase
+internal class GameInterfaceSM01GrpcService(
+    ILogger<GameInterfaceSM01GrpcService> logger,
+    IGetService<FundInQuery, FundResult> fundInService,
+    IGetService<FundOutQuery, FundResult> fundOutService,
+    IQueryService<FundHistoryQuery, FundHistoryResult> fundHistoryService,
+    ICommandService<PlayerCreateCommand> playerCreateService,
+    IGetService<PlayerBalanceQuery, PlayerBalanceResult> playerBalanceService,
+    IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> gameSettledHistorySerivce,
+    IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> gameUnsettleHistorySerivce,
+    IGetService<PlatformLoginQuery, PlatformLoginResult> platformLoginService) : GameInterfaceSM01Service.GameInterfaceSM01ServiceBase
 {
-    private readonly ILogger<GameInterfaceSM01GrpcService> _logger;
-    private readonly IGetService<FundInQuery, FundResult> _fundInService;
-    private readonly IGetService<FundOutQuery, FundResult> _fundOutService;
-    private readonly IQueryService<FundHistoryQuery, FundHistoryResult> _fundHistoryService;
-    private readonly ICommandService<PlayerCreateCommand> _playerCreateService;
-    private readonly IGetService<PlayerBalanceQuery, PlayerBalanceResult> _playerBalanceService;
-    private readonly IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> _gameSettledHistoryService;
-    private readonly IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> _gameUnsettleHistorySerivce;
-    private readonly IGetService<PlatformLoginQuery, PlatformLoginResult> _platformLoginService;
-
-    public GameInterfaceSM01GrpcService(
-        ILogger<GameInterfaceSM01GrpcService> logger,
-        IGetService<FundInQuery, FundResult> fundInService,
-        IGetService<FundOutQuery, FundResult> fundOutService,
-        IQueryService<FundHistoryQuery, FundHistoryResult> fundHistoryService,
-        ICommandService<PlayerCreateCommand> playerCreateService,
-        IGetService<PlayerBalanceQuery, PlayerBalanceResult> playerBalanceService,
-        IQueryService<GameSettledHistoryQuery, GameSettledHistoryResult> gameSettledHistorySerivce,
-        IQueryService<GameUnsettleHistoryQuery, GameUnsettleHistoryResult> gameUnsettleHistorySerivce,
-        IGetService<PlatformLoginQuery, PlatformLoginResult> platformLoginService)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
-        _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
-        _fundHistoryService = fundHistoryService ?? throw new ArgumentNullException(nameof(fundHistoryService));
-        _playerCreateService = playerCreateService ?? throw new ArgumentNullException(nameof(playerCreateService));
-        _playerBalanceService = playerBalanceService ?? throw new ArgumentNullException(nameof(playerBalanceService));
-        _gameSettledHistoryService = gameSettledHistorySerivce ?? throw new ArgumentNullException(nameof(gameSettledHistorySerivce));
-        _gameUnsettleHistorySerivce = gameUnsettleHistorySerivce ?? throw new ArgumentNullException(nameof(gameUnsettleHistorySerivce));
-        _platformLoginService = platformLoginService ?? throw new ArgumentNullException(nameof(platformLoginService));
-    }
-
     public override Task<CheckingServiceReply> CheckingService(CheckingServiceRequest request, ServerCallContext context)
     {
-        _logger.LogWarning("LogOn:{logOn} Message: Create a check connection.({machineName})", DateTime.Now.ToString("o"), request.MachineName);
+        logger.LogWarning("LogOn:{logOn} Message: Create a check connection.({machineName})", DateTime.Now.ToString("o"), request.MachineName);
 
         return Task.FromResult(new CheckingServiceReply
         {
@@ -58,7 +35,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
             MerchantKey: request.MerchantKey,
             CustomerName: request.CustomerName);
 
-        var result = await _platformLoginService
+        var result = await platformLoginService
             .GetAsync(
                 query: query,
                 cancellationToken: context.CancellationToken)
@@ -84,7 +61,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
            RefTransactionCode: request.RefTransactionCode,
            Amount: request.Amount);
 
-        var result = await _fundInService
+        var result = await fundInService
                 .GetAsync(
                     query: query,
                     cancellationToken: context.CancellationToken)
@@ -108,7 +85,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
             RefTransactionCode: request.RefTransactionCode,
             Amount: request.Amount);
 
-        var result = await _fundOutService
+        var result = await fundOutService
                 .GetAsync(
                     query: query,
                     cancellationToken: context.CancellationToken)
@@ -133,7 +110,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
             StartDate: request.StartDate.ToDateTime(),
             EndDate: request.EndDate.ToDateTime());
 
-        var fundHistorys = await _fundHistoryService
+        var fundHistorys = await fundHistoryService
             .QueryAsync(
                 query: query,
                 cancellationToken: context.CancellationToken)
@@ -141,7 +118,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
             .ConfigureAwait(false);
 
         var reply = new FundHistoryReply();
-        if (fundHistorys.Any())
+        if (fundHistorys.Length != 0)
         {
             foreach (var fundHistory in fundHistorys)
             {
@@ -166,7 +143,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
         MerchantKey: request.MerchantKey,
         CustomerName: request.CustomerName);
 
-        await _playerCreateService
+        await playerCreateService
                 .ExecuteAsync(
                     command: command,
                     cancellationToken: context.CancellationToken)
@@ -186,7 +163,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
         MerchantKey: request.MerchantKey,
         CustomerName: request.CustomerName);
 
-        var result = await _playerBalanceService
+        var result = await playerBalanceService
                 .GetAsync(
                     query: query,
                     cancellationToken: context.CancellationToken)
@@ -208,7 +185,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
             StartDate: request.StartDate.ToDateTime(),
             EndDate: request.EndDate.ToDateTime());
 
-        var gameHistorySettleds = await _gameSettledHistoryService
+        var gameHistorySettleds = await gameSettledHistorySerivce
                 .QueryAsync(
                     query: query,
                     cancellationToken: context.CancellationToken)
@@ -216,7 +193,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
                 .ConfigureAwait(false);
         var reply = new GameSettledHistoryReply();
 
-        if (gameHistorySettleds.Any())
+        if (gameHistorySettleds.Length != 0)
         {
             foreach (var gameHistorySettled in gameHistorySettleds)
             {
@@ -249,7 +226,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
             StartDate: request.StartDate.ToDateTime(),
             EndDate: request.EndDate.ToDateTime());
 
-        var gameHistorySettleds = await _gameUnsettleHistorySerivce
+        var gameHistorySettleds = await gameUnsettleHistorySerivce
                 .QueryAsync(
                     query: query,
                     cancellationToken: context.CancellationToken)
@@ -257,7 +234,7 @@ internal class GameInterfaceSM01GrpcService : GameInterfaceSM01Service.GameInter
                 .ConfigureAwait(false);
         var reply = new GameUnsettleHistoryReply();
 
-        if (gameHistorySettleds.Any())
+        if (gameHistorySettleds.Length != 0)
         {
             foreach (var gameHistorySettled in gameHistorySettleds)
             {

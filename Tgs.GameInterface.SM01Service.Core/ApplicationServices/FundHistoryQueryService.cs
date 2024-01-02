@@ -1,45 +1,38 @@
 ﻿using System.Runtime.CompilerServices;
 using Tgs.ServiceUtility;
 
-namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices
-{
-    internal class FundHistoryQueryService : IQueryService<FundHistoryQuery, FundHistoryResult>
-    {
-        private readonly IGameApiClient _client;
+namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices;
 
-        public FundHistoryQueryService(IGameApiClient client)
+internal class FundHistoryQueryService(
+    IGameApiClient client) : IQueryService<FundHistoryQuery, FundHistoryResult>
+{
+    public async IAsyncEnumerable<FundHistoryResult> QueryAsync(FundHistoryQuery query, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var fundHistorys = await client
+            .GetTransferHistoryAsync(
+                apiUrl: query.ApiUrl,
+                merchantId: query.MerchantId,
+                merchantKey: query.MerchantKey,
+                customerName: query.CustomerName,
+                isFundOut: query.IsFundOut,
+                startDate: query.StartDate,
+                endDate: query.EndDate,
+                cancellationToken: cancellationToken)
+            .ToArrayAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        if (fundHistorys.Length == 0)
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
+            yield break;
         }
 
-        public async IAsyncEnumerable<FundHistoryResult> QueryAsync(FundHistoryQuery query, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        foreach (var fundHistory in fundHistorys)
         {
-            var fundHistorys = await _client
-                .GetTransferHistoryAsync(
-                    apiUrl: query.ApiUrl,
-                    merchantId: query.MerchantId,
-                    merchantKey: query.MerchantKey,
-                    customerName: query.CustomerName,
-                    isFundOut: query.IsFundOut,
-                    startDate: query.StartDate,
-                    endDate: query.EndDate,
-                    cancellationToken: cancellationToken)
-                .ToArrayAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            if (!fundHistorys.Any())
-            {
-                yield break;
-            }
-
-            foreach (var fundHistory in fundHistorys)
-            {
-                yield return new FundHistoryResult(
-                    TransactionId: fundHistory.TransactionId,
-                    Amount: fundHistory.Amount,
-                    CreatedTime: fundHistory.CreatedTime,
-                    CustomerName: fundHistory.CustomerName);
-            }
+            yield return new FundHistoryResult(
+                TransactionId: fundHistory.TransactionId,
+                Amount: fundHistory.Amount,
+                CreatedTime: fundHistory.CreatedTime,
+                CustomerName: fundHistory.CustomerName);
         }
     }
 }

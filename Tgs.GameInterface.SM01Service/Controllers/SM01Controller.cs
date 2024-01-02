@@ -141,7 +141,7 @@ public class SM01Controller : ControllerBase
                     cancellationToken: HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
-        if (!transferRecords.Any())
+        if (transferRecords.Length == 0)
         {
             yield break;
         }
@@ -309,7 +309,7 @@ public class SM01Controller : ControllerBase
                     cancellationToken: HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
-        if (!gameRecords.Any())
+        if (gameRecords.Length == 0)
         {
             yield break;
         }
@@ -370,7 +370,7 @@ public class SM01Controller : ControllerBase
                     cancellationToken: HttpContext.RequestAborted)
                 .ConfigureAwait(false);
 
-        if (!gameRecords.Any())
+        if (gameRecords.Length == 0)
         {
             yield break;
         }

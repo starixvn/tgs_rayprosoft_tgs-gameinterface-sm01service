@@ -9,19 +9,10 @@ using Tgs.GameInterface.SM01Service.Core.Models;
 
 namespace Tgs.GameInterface.SM01Service.Core;
 
-internal class GameApiClient : IGameApiClient
+internal class GameApiClient(
+    HttpClient client,
+    ILogger<GameApiClient> logger) : IGameApiClient
 {
-    private readonly HttpClient _client;
-    private readonly ILogger<GameApiClient> _logger;
-
-    public GameApiClient(
-        HttpClient client,
-        ILogger<GameApiClient> logger)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
-
     public async ValueTask<CheckUserResult> CheckUserAsync(Uri apiUrl, string merchantId, string merchantKey, string customerName, CancellationToken cancellationToken = default)
     {
         var parameters = new Dictionary<string, string>
@@ -100,7 +91,7 @@ internal class GameApiClient : IGameApiClient
 
         IEnumerable<GetSettledTransationsHistoryResult> results = new List<GetSettledTransationsHistoryResult>();
 
-        if (data["list"] is not null && (data["list"]?.AsArray().Any() ?? false))
+        if (data["list"] is not null && (data["list"]?.AsArray().Count != 0))
         {
             var array = data["list"]!.AsArray();
 
@@ -168,7 +159,7 @@ internal class GameApiClient : IGameApiClient
 
         IEnumerable<GetUnsettleTransationsHistoryResult> results = new List<GetUnsettleTransationsHistoryResult>();
 
-        if (data["list"] is not null && (data["list"]?.AsArray().Any() ?? false))
+        if (data["list"] is not null && (data["list"]?.AsArray().Count != 0))
         {
             var array = data["list"]!.AsArray();
 
@@ -239,7 +230,7 @@ internal class GameApiClient : IGameApiClient
 
         IEnumerable<GetTransferHistoryResult> results = new List<GetTransferHistoryResult>();
 
-        if (data["list"] is not null && (data["list"]?.AsArray().Any() ?? false))
+        if (data["list"] is not null && (data["list"]?.AsArray().Count != 0))
         {
             var array = data["list"]!.AsArray();
 
@@ -291,7 +282,7 @@ internal class GameApiClient : IGameApiClient
 
             var errorMessage = jsonNode["result"]!.ToString();
 
-            _logger.LogError("getUserBalance failed, errorCode:{errorCode}, errorMessage:{errorMessage}", errorCode, errorMessage);
+            logger.LogError("getUserBalance failed, errorCode:{errorCode}, errorMessage:{errorMessage}", errorCode, errorMessage);
             return new GetUserBalanceResult(false, 0M);
         }
 
@@ -317,7 +308,7 @@ internal class GameApiClient : IGameApiClient
         var sign = SM01Hasher.ComputeHash(merchantKey, parameters);
         parameters.Add("sign", sign);
 
-        _logger.LogInformation("SM01 PlatformLoginAsync, parameters:{parameters}", JsonSerializer.Serialize(parameters));
+        logger.LogInformation("SM01 PlatformLoginAsync, parameters:{parameters}", JsonSerializer.Serialize(parameters));
 
         return ValueTask.FromResult(new PlatformLoginResult(apiUrl.ToString(), merchantId, customerName, long.Parse(parameters["timestamp"]), parameters["sign"]));
     }
@@ -359,7 +350,7 @@ internal class GameApiClient : IGameApiClient
 
         if (data is null)
         {
-            _logger.LogInformation("SM01 TransferIn data is null");
+            logger.LogInformation("SM01 TransferIn data is null");
             return new TransferInResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), 0);
         }
 
@@ -404,7 +395,7 @@ internal class GameApiClient : IGameApiClient
         var data = jsonNode["data"];
         if (data is null)
         {
-            _logger.LogInformation("SM01 TransferOut data is null");
+            logger.LogInformation("SM01 TransferOut data is null");
             return new TransferOutResult(merchantTransactionId, merchantTransactionId.Replace("-", ""), 0);
         }
 
@@ -421,7 +412,7 @@ internal class GameApiClient : IGameApiClient
 
         HttpContent content = new FormUrlEncodedContent(parameters);
 
-        var httpResponseMessage = await _client.PostAsync(apiUrl, content, cancellationToken);
+        var httpResponseMessage = await client.PostAsync(apiUrl, content, cancellationToken);
 
         sw.Stop();
 
@@ -449,7 +440,7 @@ internal class GameApiClient : IGameApiClient
             RecordedOn = DateTimeOffset.UtcNow
         };
 
-        _logger.LogInformation("{apiLogEvent}", JsonSerializer.Serialize(apiLogEvent));
+        logger.LogInformation("{apiLogEvent}", JsonSerializer.Serialize(apiLogEvent));
 
         _ = httpResponseMessage.EnsureSuccessStatusCode();
 

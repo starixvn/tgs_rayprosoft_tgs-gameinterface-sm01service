@@ -4,18 +4,12 @@ using Tgs.GameInterface.SM01Service.Protos;
 
 namespace Tgs.GameInterface.SM01Service.Client;
 
-internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
+internal class GameInterfaceSM01Client(
+    GameInterfaceSM01Service.GameInterfaceSM01ServiceClient client) : IGameInterfaceSM01Client
 {
-    private readonly GameInterfaceSM01Service.GameInterfaceSM01ServiceClient _client;
-
-    public GameInterfaceSM01Client(GameInterfaceSM01Service.GameInterfaceSM01ServiceClient client)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
-
     public async ValueTask<string> CheckingServiceAsync(string machineName, CancellationToken cancellationToken = default)
     {
-        var reply = await _client
+        var reply = await client
             .CheckingServiceAsync(
                 request: new CheckingServiceRequest
                 {
@@ -39,7 +33,7 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
             Amount = amount
         };
 
-        return await _client
+        return await client
                 .FundInAsync(
                     request: request,
                     cancellationToken: cancellationToken)
@@ -58,7 +52,7 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
             Amount = amount
         };
 
-        return await _client
+        return await client
                 .FundOutAsync(
                     request: request,
                     cancellationToken: cancellationToken)
@@ -86,13 +80,13 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
             EndDate = endDate.ToTimestamp()
         };
 
-        var reply = await _client
+        var reply = await client
                 .FundHistoryAsync(
                     request: request,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-        if (!reply.Items.Any())
+        if (reply.Items.Count == 0)
         {
             yield break;
         }
@@ -120,13 +114,13 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
             EndDate = endDate.ToTimestamp()
         };
 
-        var reply = await _client
+        var reply = await client
                 .GameSettledHistoryAsync(
                     request: request,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-        if (!reply.Items.Any())
+        if (reply.Items.Count == 0)
         {
             yield break;
         }
@@ -154,13 +148,13 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
             EndDate = endDate.ToTimestamp()
         };
 
-        var reply = await _client
+        var reply = await client
                 .GameUnsettleHistoryAsync(
                     request: request,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-        if (!reply.Items.Any())
+        if (reply.Items.Count == 0)
         {
             yield break;
         }
@@ -181,7 +175,7 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
             CustomerName = customerName,
         };
 
-        return await _client
+        return await client
                 .PlayerBalanceAsync(
                     request: request,
                     cancellationToken: cancellationToken)
@@ -198,7 +192,7 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
             CustomerName = customerName,
         };
 
-        _ = await _client
+        _ = await client
                 .PlayerCreateAsync(
                     request: request,
                     cancellationToken: cancellationToken)
@@ -215,7 +209,7 @@ internal class GameInterfaceSM01Client : IGameInterfaceSM01Client
             CustomerName = customerName,
         };
 
-        return await _client
+        return await client
             .PlatformLoginAsync(
                 request: request,
                 cancellationToken: cancellationToken)

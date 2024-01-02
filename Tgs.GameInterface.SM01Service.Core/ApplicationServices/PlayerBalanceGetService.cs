@@ -2,18 +2,12 @@
 
 namespace Tgs.GameInterface.SM01Service.Core.ApplicationServices;
 
-internal class PlayerBalanceGetService : IGetService<PlayerBalanceQuery, PlayerBalanceResult>
+internal class PlayerBalanceGetService(
+    IGameApiClient client) : IGetService<PlayerBalanceQuery, PlayerBalanceResult>
 {
-    private readonly IGameApiClient _client;
-
-    public PlayerBalanceGetService(IGameApiClient client)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-    }
-
     public async ValueTask<PlayerBalanceResult> GetAsync(PlayerBalanceQuery query, CancellationToken cancellationToken = default)
     {
-        var result = await _client.GetUserBalanceAsync(
+        var result = await client.GetUserBalanceAsync(
             apiUrl: query.ApiUrl,
             merchantId: query.MerchantId,
             merchantKey: query.MerchantKey,
