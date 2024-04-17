@@ -8,18 +8,18 @@ namespace Tgs.GameInterface.SM01Service.Core.UnitTest;
 [TestClass]
 public class GetSettledTransactionsHistoryUnitTests
 {
-    [TestMethod]
-    public async Task 獲取交易歷史紀錄()
-    {
-        var apiUrl = new Uri("https://cn.ucfclive.com");
-        var merchantId = "SQjCxm2cX5bahBta";
-        var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";
+	[TestMethod]
+	public async Task 獲取交易歷史紀錄()
+	{
+		var apiUrl = new Uri("https://cn.ucfclive.com");
+		var merchantId = "SQjCxm2cX5bahBta";
+		var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";
 
-        var startDate = new DateTime(2023, 01, 11, 16, 20, 00);
-        var endDate = new DateTime(2023, 01, 11, 16, 50, 00);
+		var startDate = new DateTime(2023, 01, 11, 16, 20, 00);
+		var endDate = new DateTime(2023, 01, 11, 16, 50, 00);
 
-        var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
-        var response = """
+		var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
+		var response = """
                         {
                 "process": "success",
                 "result": "",
@@ -66,46 +66,46 @@ public class GetSettledTransactionsHistoryUnitTests
             }
             """;
 
-        var handler = new MockHttpMessageHandler();
+		var handler = new MockHttpMessageHandler();
 
-        _ = handler
-            .Expect(HttpMethod.Post, url.ToString())
-            .Respond(HttpStatusCode.OK, new StringContent(response));
+		_ = handler
+			.Expect(HttpMethod.Post, url.ToString())
+			.Respond(HttpStatusCode.OK, new StringContent(response));
 
-        var fakeHttpClient = handler.ToHttpClient();
+		var fakeHttpClient = handler.ToHttpClient();
 
-        var fakeLog = NullLogger<GameApiClient>.Instance;
-        var sut = new GameApiClient(fakeHttpClient, fakeLog);
+		var fakeLog = NullLogger<GameApiClient>.Instance;
+		var sut = new GameApiClient(fakeHttpClient, fakeLog);
 
-        var actual = await sut
-            .GetSettledTransationsHistoryAsync(
-                apiUrl: apiUrl,
-                merchantId: merchantId,
-                merchantKey: merchantKey,
-                startDate: startDate,
-                endDate: endDate)
-            .ToArrayAsync()
-            .ConfigureAwait(false);
+		var actual = await sut
+			.GetSettledTransationsHistoryAsync(
+				apiUrl: apiUrl,
+				merchantId: merchantId,
+				merchantKey: merchantKey,
+				startDate: startDate,
+				endDate: endDate)
+			.ToArrayAsync()
+			.ConfigureAwait(false);
 
-        Assert.IsNotNull(actual);
-        Assert.AreEqual(3, actual.Length);
-        Assert.AreEqual("4ue4l6qtysn3", actual[0].PlayerCode);
-        Assert.AreEqual("8854209", actual[0].ExternalRoundId);
-        Assert.AreEqual(160M, actual[0].Bet);
-    }
+		Assert.IsNotNull(actual);
+		Assert.AreEqual(3, actual.Length);
+		Assert.AreEqual("4ue4l6qtysn3", actual[0].PlayerCode);
+		Assert.AreEqual("8854209", actual[0].ExternalRoundId);
+		Assert.AreEqual(160M, actual[0].Bet);
+	}
 
-    [TestMethod]
-    public async Task 獲取交易歷史紀錄_取消比賽()
-    {
-        var apiUrl = new Uri("https://cn.ucfclive.com");
-        var merchantId = "SQjCxm2cX5bahBta";
-        var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";
+	[TestMethod]
+	public async Task 獲取交易歷史紀錄_取消比賽()
+	{
+		var apiUrl = new Uri("https://cn.ucfclive.com");
+		var merchantId = "SQjCxm2cX5bahBta";
+		var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";
 
-        var startDate = new DateTime(2023, 01, 11, 16, 20, 00);
-        var endDate = new DateTime(2023, 01, 11, 16, 50, 00);
+		var startDate = new DateTime(2023, 01, 11, 16, 20, 00);
+		var endDate = new DateTime(2023, 01, 11, 16, 50, 00);
 
-        var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
-        var response = """
+		var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
+		var response = """
                         {
                 "process": "success",
                 "result": "",
@@ -152,66 +152,66 @@ public class GetSettledTransactionsHistoryUnitTests
             }
             """;
 
-        var handler = new MockHttpMessageHandler();
+		var handler = new MockHttpMessageHandler();
 
-        _ = handler
-            .Expect(HttpMethod.Post, url.ToString())
-            .Respond(HttpStatusCode.OK, new StringContent(response));
+		_ = handler
+			.Expect(HttpMethod.Post, url.ToString())
+			.Respond(HttpStatusCode.OK, new StringContent(response));
 
-        var fakeHttpClient = handler.ToHttpClient();
+		var fakeHttpClient = handler.ToHttpClient();
 
-        var fakeLog = NullLogger<GameApiClient>.Instance;
-        var sut = new GameApiClient(fakeHttpClient, fakeLog);
+		var fakeLog = NullLogger<GameApiClient>.Instance;
+		var sut = new GameApiClient(fakeHttpClient, fakeLog);
 
-        var actual = await sut
-            .GetSettledTransationsHistoryAsync(
-                apiUrl: apiUrl,
-                merchantId: merchantId,
-                merchantKey: merchantKey,
-                startDate: startDate,
-                endDate: endDate)
-            .ToArrayAsync()
-            .ConfigureAwait(false);
+		var actual = await sut
+			.GetSettledTransationsHistoryAsync(
+				apiUrl: apiUrl,
+				merchantId: merchantId,
+				merchantKey: merchantKey,
+				startDate: startDate,
+				endDate: endDate)
+			.ToArrayAsync()
+			.ConfigureAwait(false);
 
-        Assert.IsNotNull(actual);
-        Assert.AreEqual(3, actual.Length);
-        Assert.AreEqual(true, actual[2].IsCancelled);
-    }
+		Assert.IsNotNull(actual);
+		Assert.AreEqual(3, actual.Length);
+		Assert.AreEqual(true, actual[2].IsCancelled);
+	}
 
-    [TestMethod]
-    public async Task 開始時間與結束時間不能超過30分鐘()
-    {
-        var apiUrl = new Uri("https://cn.ucfclive.com");
-        var merchantId = "SQjCxm2cX5bahBta";
-        var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";
+	[TestMethod]
+	public async Task 開始時間與結束時間不能超過30分鐘()
+	{
+		var apiUrl = new Uri("https://cn.ucfclive.com");
+		var merchantId = "SQjCxm2cX5bahBta";
+		var merchantKey = "XGKGkcmYNnfex8AecKzCEbD4GMExA2cb";
 
-        var startDate = DateTime.UtcNow.AddMinutes(-31);
-        var endDate = DateTime.UtcNow;
+		var startDate = DateTime.UtcNow.AddMinutes(-31);
+		var endDate = DateTime.UtcNow;
 
-        var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
-        var response = "{\"process\":\"error\",\"result\":\"The maximum time range for each search is 30 minutes\",\"code\":6001}";
+		var url = new Uri(apiUrl, "/api/merchant/getTransationsHistory");
+		var response = "{\"process\":\"error\",\"result\":\"The maximum time range for each search is 30 minutes\",\"code\":6001}";
 
-        var handler = new MockHttpMessageHandler();
+		var handler = new MockHttpMessageHandler();
 
-        _ = handler
-            .Expect(HttpMethod.Post, url.ToString())
-            .Respond(HttpStatusCode.OK, new StringContent(response));
+		_ = handler
+			.Expect(HttpMethod.Post, url.ToString())
+			.Respond(HttpStatusCode.OK, new StringContent(response));
 
-        var fakeHttpClient = handler.ToHttpClient();
+		var fakeHttpClient = handler.ToHttpClient();
 
-        var fakeLog = NullLogger<GameApiClient>.Instance;
-        var sut = new GameApiClient(fakeHttpClient, fakeLog);
+		var fakeLog = NullLogger<GameApiClient>.Instance;
+		var sut = new GameApiClient(fakeHttpClient, fakeLog);
 
-        _ = await Assert
-        .ThrowsExceptionAsync<GameProviderResponseErrorException>(() =>
-            sut.GetSettledTransationsHistoryAsync(
-                apiUrl: apiUrl,
-                merchantId: merchantId,
-                merchantKey: merchantKey,
-                startDate: startDate,
-                endDate: endDate)
-            .ToArrayAsync()
-            .AsTask())
-        .ConfigureAwait(false);
-    }
+		_ = await Assert
+		.ThrowsExceptionAsync<GameProviderResponseErrorException>(() =>
+			sut.GetSettledTransationsHistoryAsync(
+				apiUrl: apiUrl,
+				merchantId: merchantId,
+				merchantKey: merchantKey,
+				startDate: startDate,
+				endDate: endDate)
+			.ToArrayAsync()
+			.AsTask())
+		.ConfigureAwait(false);
+	}
 }

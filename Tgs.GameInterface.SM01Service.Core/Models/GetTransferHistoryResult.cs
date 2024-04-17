@@ -2,11 +2,11 @@
 
 public record GetTransferHistoryResult
 {
-    public string TransactionId { get; init; } = default!;
+	public string TransactionId { get; init; } = default!;
 
-    public int Amount { get; init; }
+	public int Amount { get; init; }
 
-    public string CustomerName { get; init; } = default!;
+	public string CustomerName { get; init; } = default!;
 
-    public DateTime CreatedTime { get; init; }
+	public DateTime CreatedTime { get; init; }
 }
