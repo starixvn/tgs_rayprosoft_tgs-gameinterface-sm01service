@@ -4,6 +4,5 @@ namespace Tgs.GameInterface.SM01Service;
 
 public class DiagnosticsInterceptorOptions
 {
-	public ActivitySource InterceptorActivitySource { get; set; } =
-		new ActivitySource($"Tgs.GameInterface.SM01Service.DiagnosticsInterceptor");
+	public ActivitySource InterceptorActivitySource { get; set; } = new ActivitySource(typeof(DiagnosticsInterceptorOptions).FullName!);
 }
