@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameInterface.SM01Servi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tgs.GameInterface.SM01Service.Client", "Tgs.GameInterface.SM01Service.Client\Tgs.GameInterface.SM01Service.Client.csproj", "{F50216EA-B21C-4155-A6AE-B8EFAD4DA3A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tgs.GameInterface.SM01Service.Protos", "Tgs.GameInterface.SM01Service.Protos\Tgs.GameInterface.SM01Service.Protos.csproj", "{9D48F456-8E0A-4F41-89D2-DE44819C3B1E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F50216EA-B21C-4155-A6AE-B8EFAD4DA3A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F50216EA-B21C-4155-A6AE-B8EFAD4DA3A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F50216EA-B21C-4155-A6AE-B8EFAD4DA3A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D48F456-8E0A-4F41-89D2-DE44819C3B1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D48F456-8E0A-4F41-89D2-DE44819C3B1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D48F456-8E0A-4F41-89D2-DE44819C3B1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D48F456-8E0A-4F41-89D2-DE44819C3B1E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
